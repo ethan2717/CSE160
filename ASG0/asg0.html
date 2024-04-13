@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>asg0</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="example" width="400" height="400">
+      Please use a browser that supports "canvas"
+    </canvas>
+    <script src="asg0.js"></script>
+    <script src="./lib/cuon-matrix-cse160.js"></script>
+
+    <br>
+
+    <label for="v1_x">v1: x</label>
+    <input type="number" id="v1_x" name="v1_x" />
+    <label for="v1_y"> y</label>
+    <input type="number" id="v1_y" name="v1_y" />
+    <br>
+    <label for="v2_x">v2: x</label>
+    <input type="number" id="v2_x" name="v2_x" />
+    <label for="v2_y"> y</label>
+    <input type="number" id="v2_y" name="v2_y" />
+    <br>
+    <input type="button" id="draw" value="Draw" onclick="handleDrawEvent()" />
+
+    <br><br>
+
+    <label for="operation">Operation:</label>
+    <select name="operation" id="op-select">
+      <option value="add">Add</option>
+      <option value="sub">Subtract</option>
+      <option value="mul">Multiply</option>
+      <option value="div">Divide</option>
+      <option value="ang">Angle Between</option>
+      <option value="are">Area</option>
+      <option value="mag">Magnitude</option>
+      <option value="nor">Normalize</option>
+    </select>
+    <label for="scalar">Scalar:</label>
+    <input type="number" id="scalar" name="scalar" />
+    <br>
+    <input type="button" id="draw" value="Draw" onclick="handleDrawOperationEvent()" />
+  </body>
+</html>
