@@ -68,8 +68,9 @@ const TRIANGLE = 1;
 const CIRCLE = 2;
 
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
-let g_selectedSize = 5;
+let g_selectedSize = 10.0;
 let g_selectedType = POINT;
+let g_selectedSegment = 10;
 
 function addActionsForHtmlUI() {
   document.getElementById('clearButton').onclick = function() {
@@ -86,6 +87,7 @@ function addActionsForHtmlUI() {
   document.getElementById('blueSlide').addEventListener('mouseup', function() { g_selectedColor[2] = this.value / 100; });
 
   document.getElementById('sizeSlide').addEventListener('mouseup', function() { g_selectedSize = this.value; });
+  document.getElementById('segSlide').addEventListener('mouseup', function() { g_selectedSegment = this.value; });
 }
 
 function main() {
@@ -127,6 +129,7 @@ function click(ev) {
   point.position = [x, y];
   point.color = g_selectedColor.slice();
   point.size = g_selectedSize;
+  point.segments = g_selectedSegment;
   g_shapesList.push(point);
 
   renderAllShapes();
