@@ -66,6 +66,7 @@ function connectVariablesToGLSL() {
 const POINT = 0;
 const TRIANGLE = 1;
 const CIRCLE = 2;
+const STAR = 3;
 
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 10.0;
@@ -82,6 +83,7 @@ function addActionsForHtmlUI() {
   document.getElementById('sqButton').onclick = function() { g_selectedType = POINT; };
   document.getElementById('triButton').onclick = function() { g_selectedType = TRIANGLE; };
   document.getElementById('circButton').onclick = function() { g_selectedType = CIRCLE; };
+  document.getElementById('starButton').onclick = function() { g_selectedType = STAR; };
 
   document.getElementById('redSlide').addEventListener('mouseup', function() { g_selectedColor[0] = this.value / 100; });
   document.getElementById('greenSlide').addEventListener('mouseup', function() { g_selectedColor[1] = this.value / 100; });
@@ -123,9 +125,11 @@ function click(ev) {
   if (g_selectedType == POINT) {
     point = new Point();
   } else if (g_selectedType == TRIANGLE) {
-    point = new Triangle();
-  } else {
+    point = new Triangle(false);
+  } else if (g_selectedType == CIRCLE){
     point = new Circle();
+  } else {
+    point = new Triangle(true);
   }
   point.position = [x, y];
   point.color = g_selectedColor.slice();

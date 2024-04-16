@@ -1,9 +1,10 @@
 class Triangle {
-    constructor() {
+    constructor(star) {
         this.type = 'triangle';
         this.position = [0.0, 0.0, 0.0];
         this.color = [1.0, 1.0, 1.0, 1.0];
         this.size = 10.0;
+        this.star = star;
     }
 
     render() {
@@ -19,6 +20,9 @@ class Triangle {
         // Draw
         const d = this.size / 350.0;
         drawTriangle([xy[0]-d, xy[1], xy[0]+d, xy[1], xy[0], xy[1]+1.75*d]);
+        if (this.star) {
+            drawTriangle([xy[0]-d, xy[1]+d*1.02, xy[0]+d, xy[1]+d*1.02, xy[0], xy[1]-0.75*d]);
+        }
     }
 }
 
