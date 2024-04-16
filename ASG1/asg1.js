@@ -75,8 +75,9 @@ let g_selectedSegment = 10;
 function addActionsForHtmlUI() {
   document.getElementById('clearButton').onclick = function() {
     g_shapesList = [];
-    renderAllShapes();
+    renderAllShapes(false);
   };
+  document.getElementById('undoButton').onclick = function() { renderAllShapes(true) };
 
   document.getElementById('sqButton').onclick = function() { g_selectedType = POINT; };
   document.getElementById('triButton').onclick = function() { g_selectedType = TRIANGLE; };
@@ -113,7 +114,7 @@ function main() {
   gl.clear(gl.COLOR_BUFFER_BIT);
 }
 
-const g_shapesList = [];
+let g_shapesList = [];
 
 function click(ev) {
   let [x, y] = convertCoordinatesEventToGL(ev);
@@ -132,7 +133,7 @@ function click(ev) {
   point.segments = g_selectedSegment;
   g_shapesList.push(point);
 
-  renderAllShapes();
+  renderAllShapes(false);
 }
 
 function convertCoordinatesEventToGL(ev) {
@@ -146,9 +147,13 @@ function convertCoordinatesEventToGL(ev) {
   return ([x, y]);
 }
 
-function renderAllShapes() {
+function renderAllShapes(exceptLast) {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
+
+  if (exceptLast) {
+    g_shapesList.pop();
+  }
 
   for (let i = 0; i < g_shapesList.length; i++) {
     g_shapesList[i].render();
