@@ -17,6 +17,7 @@ const FSHADER_SOURCE = `
   }`;
 
 // Global variables
+let g_shapesList = [];
 let canvas;
 let gl;
 let a_Position;
@@ -91,6 +92,11 @@ function addActionsForHtmlUI() {
 
   document.getElementById('sizeSlide').addEventListener('mouseup', function() { g_selectedSize = this.value; });
   document.getElementById('segSlide').addEventListener('mouseup', function() { g_selectedSegment = this.value; });
+  
+  document.getElementById('drawPicture').onclick = function() {
+    g_shapesList = drawPicture();
+    renderAllShapes(false);
+  };
 }
 
 function main() {
@@ -115,8 +121,6 @@ function main() {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
 }
-
-let g_shapesList = [];
 
 function click(ev) {
   let [x, y] = convertCoordinatesEventToGL(ev);
