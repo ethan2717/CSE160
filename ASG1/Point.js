@@ -7,9 +7,9 @@ class Point {
     }
 
     render() {
-        var xy = this.position;
-        var rgba = this.color;
-        var size = this.size;
+        const xy = this.position;
+        const rgba = this.color;
+        const size = this.size;
 
         gl.disableVertexAttribArray(a_Position);
         // Pass the position of a point to a_Position variable

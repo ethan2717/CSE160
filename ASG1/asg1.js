@@ -1,6 +1,6 @@
 // ColoredPoint.js (c) 2012 matsuda
 // Vertex shader program
-var VSHADER_SOURCE = `
+const VSHADER_SOURCE = `
   attribute vec4 a_Position;
   uniform float u_Size;
   void main() {
@@ -9,7 +9,7 @@ var VSHADER_SOURCE = `
   }`;
 
 // Fragment shader program
-var FSHADER_SOURCE = `
+const FSHADER_SOURCE = `
   precision mediump float;
   uniform vec4 u_FragColor;
   void main() {
@@ -113,7 +113,7 @@ function main() {
   gl.clear(gl.COLOR_BUFFER_BIT);
 }
 
-var g_shapesList = [];
+const g_shapesList = [];
 
 function click(ev) {
   let [x, y] = convertCoordinatesEventToGL(ev);
@@ -136,8 +136,8 @@ function click(ev) {
 }
 
 function convertCoordinatesEventToGL(ev) {
-  var x = ev.clientX; // x coordinate of a mouse pointer
-  var y = ev.clientY; // y coordinate of a mouse pointer
+  let x = ev.clientX; // x coordinate of a mouse pointer
+  let y = ev.clientY; // y coordinate of a mouse pointer
   var rect = ev.target.getBoundingClientRect();
 
   x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
@@ -150,8 +150,7 @@ function renderAllShapes() {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  var len = g_shapesList.length;
-  for (var i = 0; i < len; i++) {
+  for (let i = 0; i < g_shapesList.length; i++) {
     g_shapesList[i].render();
   }
 }

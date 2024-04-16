@@ -7,9 +7,9 @@ class Triangle {
     }
 
     render() {
-        var xy = this.position;
-        var rgba = this.color;
-        var size = this.size;
+        const xy = this.position;
+        const rgba = this.color;
+        const size = this.size;
 
         // Pass the color of a point to u_FragColor variable
         gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
@@ -17,16 +17,16 @@ class Triangle {
         gl.uniform1f(u_Size, size);
 
         // Draw
-        var d = this.size / 350.0;
+        const d = this.size / 350.0;
         drawTriangle([xy[0]-d, xy[1], xy[0]+d, xy[1], xy[0], xy[1]+1.75*d]);
     }
 }
 
 function drawTriangle(vertices) {
-    var n = 3; // The number of vertices
+    const n = 3; // The number of vertices
 
     // Create a buffer object
-    var vertexBuffer = gl.createBuffer();
+    const vertexBuffer = gl.createBuffer();
     if (!vertexBuffer) {
         console.log('Failed to create the buffer object');
         return -1;

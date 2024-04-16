@@ -8,13 +8,13 @@ class Circle {
     }
 
     render() {
-        var xy = this.position;
-        var rgba = this.color;
-        var size = this.size;
+        const xy = this.position;
+        const rgba = this.color;
+        const size = this.size;
 
         gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
 
-        var d = this.size / 350.0;
+        const d = this.size / 350.0;
         let step = 360 / this.segments;
         for (let angle = 0; angle < 360; angle += step) {
             let center = [xy[0], xy[1]];
