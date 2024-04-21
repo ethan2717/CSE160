@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import {OBJLoader} from 'https://threejs.org/examples/jsm/loaders/OBJLoader.js';
+import {MTLLoader} from 'https://threejs.org/examples/jsm/loaders/MTLLoader.js';
 
 let renderer;
 let camera;
@@ -35,6 +37,16 @@ function main() {
     const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(-1, 2, 4);
     scene.add(light);
+
+    const objLoader = new OBJLoader();
+    const mtlLoader = new MTLLoader();
+    mtlLoader.load('./moped/materials.mtl', (mtl) => {
+        mtl.preload();
+        objLoader.setMaterials(mtl);
+        objLoader.load('./moped/model.obj', (root) => {
+            scene.add(root);
+        });
+    });
 }
 
 requestAnimationFrame(render);
