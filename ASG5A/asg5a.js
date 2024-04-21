@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+let cube;
+
 main();
 function main() {
     const canvas = document.querySelector('#c');
@@ -19,7 +21,7 @@ function main() {
     const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
     const material = new THREE.MeshBasicMaterial({color: 0x44aa88});
-    const cube = new THREE.Mesh(geometry, material);
+    cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
     renderer.render(scene, camera);
 }
