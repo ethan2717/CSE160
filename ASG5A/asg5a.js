@@ -12,25 +12,23 @@ function main() {
     const canvas = document.querySelector('#c');
     renderer = new THREE.WebGLRenderer({antialias: true, canvas});
 
-    const fov = 75;
+    const fov = 45;
     const aspect = 2;
     const near = 0.1;
-    const far = 5;
+    const far = 10;
     camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.z = 2;
+    camera.position.set(0, 2, 8);
 
     scene = new THREE.Scene();
-    const boxWidth = 1;
-    const boxHeight = 1;
-    const boxDepth = 1;
-    const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+    const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const sphGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+    const cylGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
 
     cubes = [
-        makeInstance(geometry, 0x44aa88,  0),
-        makeInstance(geometry, 0x8844aa, -2),
-        makeInstance(geometry, 0xaa8844,  2),
+        makeInstance(cubeGeometry, 0x44aa88, 0),
+        makeInstance(sphGeometry, 0x8844aa, -2),
+        makeInstance(cylGeometry, 0xaa8844,  2),
     ];
-    renderer.render(scene, camera);
 
     const color = 0xFFFFFF;
     const intensity = 3;
@@ -47,6 +45,7 @@ function main() {
             scene.add(root);
         });
     });
+    renderer.render(scene, camera);
 }
 
 requestAnimationFrame(render);
@@ -68,8 +67,9 @@ function makeInstance(geometry, color, x) {
     texture.colorSpace = THREE.SRGBColorSpace;
 
     const material = new THREE.MeshPhongMaterial({color, map: texture});
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    cube.position.x = x;
-    return cube;
+    const shape = new THREE.Mesh(geometry, material);
+    scene.add(shape);
+    shape.position.x = x;
+    shape.position.y = 4;
+    return shape;
 }
