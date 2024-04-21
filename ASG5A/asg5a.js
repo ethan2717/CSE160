@@ -51,7 +51,11 @@ function render(time) {
 }
 
 function makeInstance(geometry, color, x) {
-    const material = new THREE.MeshPhongMaterial({color});
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load('wall.jpg');
+    texture.colorSpace = THREE.SRGBColorSpace;
+
+    const material = new THREE.MeshPhongMaterial({color, map: texture});
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
     cube.position.x = x;
