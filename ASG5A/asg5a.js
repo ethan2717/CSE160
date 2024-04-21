@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+
+main();
 function main() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
@@ -21,4 +23,12 @@ function main() {
     scene.add(cube);
     renderer.render(scene, camera);
 }
-main();
+
+requestAnimationFrame(render);
+function render(time) {
+    time *= 0.001;
+    cube.rotation.x = time;
+    cube.rotation.y = time;
+    render.render(scene, camera);
+    requestAnimationFrame(render);
+}
