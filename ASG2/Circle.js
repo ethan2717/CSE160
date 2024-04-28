@@ -24,7 +24,7 @@ class Circle {
             let v2 = [Math.cos(a2 * Math.PI/180) * d, Math.sin(a2 * Math.PI/180) * d];
             let p1 = [center[0] + v1[0], center[1] + v1[1]];
             let p2 = [center[0] + v2[0], center[1] + v2[1]];
-            drawTriangle([xy[0], xy[1], p1[0], p1[1], p2[0], p2[1]]);
+            drawTriangle(2, [xy[0], xy[1], p1[0], p1[1], p2[0], p2[1]]);
         }
     }
 }

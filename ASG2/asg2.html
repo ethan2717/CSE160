@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>asg1</title>
+    <title>asg2</title>
   </head>
 
   <body onload="main()">
@@ -28,15 +28,13 @@
     Blue <input type="range" min="0" max="100" value="100" class="slider" id="blueSlide">
     <br>
     Shape Size: <input type="range" min="5" max="40" value="10" class="slider" id="sizeSlide">
-    (Circles) Segment Count: <input type="range" min="3" max="40" value="10" class="slider" id="segSlide">
-    <br><br>
-    <button type="button" id="drawPicture">Draw Picture</button>
-
-    <p><a href="./notes.html">Click here to view my notes about the original drawing and the awesomeness requirement.</a></p>
+    Camera Angle: <input type="range" min="0" max="90" value="5" class="slider" id="angleSlide">
 
     <script src="../lib/webgl-utils.js"></script>
     <script src="../lib/webgl-debug.js"></script>
     <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix.js"></script>
+    <script src="Cube.js"></script>
     <script src="Circle.js"></script>
     <script src="Triangle.js"></script>
     <script src="Point.js"></script>

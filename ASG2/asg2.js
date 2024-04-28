@@ -2,10 +2,10 @@
 // Vertex shader program
 const VSHADER_SOURCE = `
   attribute vec4 a_Position;
-  uniform float u_Size;
+  uniform mat4 u_ModelMatrix;
+  uniform mat4 u_GlobalRotateMatrix;
   void main() {
-    gl_Position = a_Position;
-    gl_PointSize = u_Size;
+    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
   }`;
 
 // Fragment shader program
@@ -22,7 +22,24 @@ let canvas;
 let gl;
 let a_Position;
 let u_FragColor;
-let u_Size;
+let u_ModelMatrix;
+let u_GlobalRotateMatrix;
+
+function main() {
+
+  setupWebGL();
+
+  connectVariablesToGLSL();
+
+  addActionsForHtmlUI();
+
+  // Specify the color for clearing <canvas>
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  renderAllShapes();
+}
 
 function setupWebGL() {
   // Retrieve <canvas> element
@@ -34,6 +51,8 @@ function setupWebGL() {
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
+
+  gl.enable(gl.DEPTH_TEST);
 }
 
 function connectVariablesToGLSL() {
@@ -57,9 +76,15 @@ function connectVariablesToGLSL() {
     return;
   }
 
-  u_Size = gl.getUniformLocation(gl.program, 'u_Size');
-  if (!u_Size) {
-    console.log('Failed to get the storage location of u_Size');
+  u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  if (!u_ModelMatrix) {
+    console.log('Failed to get the storage location of u_ModelMatrix');
+    return;
+  }
+
+  u_GlobalRotateMatrix = gl.getUniformLocation(gl.program, 'u_GlobalRotateMatrix');
+  if (!u_GlobalRotateMatrix) {
+    console.log('Failed to get the storage location of u_GlobalRotateMatrix');
     return;
   }
 }
@@ -72,7 +97,7 @@ const STAR = 3;
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 10.0;
 let g_selectedType = POINT;
-let g_selectedSegment = 10;
+let g_globalAngle = 0;
 
 function addActionsForHtmlUI() {
   document.getElementById('clearButton').onclick = function() {
@@ -91,79 +116,40 @@ function addActionsForHtmlUI() {
   document.getElementById('blueSlide').addEventListener('mouseup', function() { g_selectedColor[2] = this.value / 100; });
 
   document.getElementById('sizeSlide').addEventListener('mouseup', function() { g_selectedSize = this.value; });
-  document.getElementById('segSlide').addEventListener('mouseup', function() { g_selectedSegment = this.value; });
-  
-  document.getElementById('drawPicture').onclick = function() {
-    g_shapesList = drawPicture();
-    renderAllShapes(false);
-  };
+  document.getElementById('angleSlide').addEventListener('mousemove', function() {
+    g_globalAngle = this.value;
+    renderAllShapes();
+  });
 }
 
-function main() {
-
-  setupWebGL();
-
-  connectVariablesToGLSL();
-
-  addActionsForHtmlUI();
-
-  // Register function (event handler) to be called on a mouse press
-  canvas.onmousedown = click;
-  canvas.onmousemove = function(ev) {
-    if (ev.buttons == 1) {
-      click(ev);
-    }
-  };
-
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+function renderAllShapes() {
+  const globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
+  gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
-}
-
-function click(ev) {
-  let [x, y] = convertCoordinatesEventToGL(ev);
-
-  let point;
-  if (g_selectedType == POINT) {
-    point = new Point();
-  } else if (g_selectedType == TRIANGLE) {
-    point = new Triangle(false);
-  } else if (g_selectedType == CIRCLE){
-    point = new Circle();
-  } else {
-    point = new Triangle(true);
-  }
-  point.position = [x, y];
-  point.color = g_selectedColor.slice();
-  point.size = g_selectedSize;
-  point.segments = g_selectedSegment;
-  g_shapesList.push(point);
-
-  renderAllShapes(false);
-}
-
-function convertCoordinatesEventToGL(ev) {
-  let x = ev.clientX; // x coordinate of a mouse pointer
-  let y = ev.clientY; // y coordinate of a mouse pointer
-  var rect = ev.target.getBoundingClientRect();
-
-  x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
-  y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
-
-  return ([x, y]);
-}
-
-function renderAllShapes(exceptLast) {
-  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  if (exceptLast) {
-    g_shapesList.pop();
-  }
+  const body = new Cube();
+  body.color = [1, 0, 0, 1];
+  body.matrix.translate(-0.25, -0.75, 0);
+  body.matrix.rotate(-5, 1, 0, 0);
+  body.matrix.scale(0.5, 0.3, 0.5);
+  body.render();
 
-  for (let i = 0; i < g_shapesList.length; i++) {
-    g_shapesList[i].render();
-  }
+  const leftArm = new Cube();
+  leftArm.color = [1, 1, 0, 1];
+  leftArm.matrix.setTranslate(0, -0.5, 0);
+  leftArm.matrix.rotate(-5, 1, 0, 0);
+  leftArm.matrix.rotate(0, 0, 0, 1);
+  leftArm.matrix.scale(0.25, 0.7, 0.5);
+  leftArm.matrix.translate(-0.5, 0, 0);
+  leftArm.render();
+
+  const box = new Cube();
+  box.color = [1, 0, 1, 1];
+  box.matrix.translate(-0.1, 0.1, 0, 0);
+  box.matrix.rotate(-30, 1, 0, 0);
+  box.matrix.scale(0.2, 0.4, 0.2);
+  box.render();
 }
