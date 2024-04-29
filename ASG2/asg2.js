@@ -17,7 +17,6 @@ const FSHADER_SOURCE = `
   }`;
 
 // Global variables
-let g_shapesList = [];
 let canvas;
 let gl;
 let a_Position;
@@ -36,9 +35,17 @@ function main() {
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
+  canvas.onmousedown = click;
+  canvas.onmousemove = function(ev) {
+    if (ev.buttons == 1) {
+      click(ev);
+    }
+  };
+
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
-  renderAllShapes();
+
+  requestAnimationFrame(tick);
 }
 
 function setupWebGL() {
@@ -58,7 +65,7 @@ function setupWebGL() {
 function connectVariablesToGLSL() {
   // Initialize shaders
   if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-    console.log('Failed to initialize shaders.');
+    console.log('Failed to initialize shaders');
     return;
   }
 
@@ -87,48 +94,91 @@ function connectVariablesToGLSL() {
     console.log('Failed to get the storage location of u_GlobalRotateMatrix');
     return;
   }
+
+  const identityMat = new Matrix4();
+  gl.uniformMatrix4fv(u_ModelMatrix, false, identityMat.elements);
 }
 
-const POINT = 0;
-const TRIANGLE = 1;
-const CIRCLE = 2;
-const STAR = 3;
+// More global variables
+let g_horzAngle = 0;
+let g_vertAngle = 0;
+let g_headHorzAngle = 0;
+let g_headVertAngle = 0;
+let g_armLeftAngle = 0;
+let g_armRightAngle = 0;
+let g_legLeftAngle = 0;
+let g_legRightAngle = 0;
 
-let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
-let g_selectedSize = 10.0;
-let g_selectedType = POINT;
-let g_globalAngle = 0;
+// Animation-related global variables
+let g_poke = false;
+let g_animation = false;
+let g_start = performance.now() / 1000;
+let g_seconds = 0;
 
 function addActionsForHtmlUI() {
-  document.getElementById('clearButton').onclick = function() {
-    g_shapesList = [];
-    renderAllShapes(false);
-  };
-  document.getElementById('undoButton').onclick = function() { renderAllShapes(true) };
-
-  document.getElementById('sqButton').onclick = function() { g_selectedType = POINT; };
-  document.getElementById('triButton').onclick = function() { g_selectedType = TRIANGLE; };
-  document.getElementById('circButton').onclick = function() { g_selectedType = CIRCLE; };
-  document.getElementById('starButton').onclick = function() { g_selectedType = STAR; };
-
-  document.getElementById('redSlide').addEventListener('mouseup', function() { g_selectedColor[0] = this.value / 100; });
-  document.getElementById('greenSlide').addEventListener('mouseup', function() { g_selectedColor[1] = this.value / 100; });
-  document.getElementById('blueSlide').addEventListener('mouseup', function() { g_selectedColor[2] = this.value / 100; });
-
-  document.getElementById('sizeSlide').addEventListener('mouseup', function() { g_selectedSize = this.value; });
-  document.getElementById('angleSlide').addEventListener('mousemove', function() {
-    g_globalAngle = this.value;
+  document.getElementById('horzSlide').addEventListener('mousemove', function() {
+    g_horzAngle = this.value;
     renderAllShapes();
   });
+  document.getElementById('vertSlide').addEventListener('mousemove', function() {
+    g_vertAngle = this.value;
+    renderAllShapes();
+  });
+
+  document.getElementById('headHorzSlide').addEventListener('mousemove', function() {
+    g_headHorzAngle = this.value;
+    renderAllShapes();
+  });
+  document.getElementById('headVertSlide').addEventListener('mousemove', function() {
+    g_headVertAngle = this.value;
+    renderAllShapes();
+  });
+
+  document.getElementById('armLeftSlide').addEventListener('mousemove', function() {
+    g_armLeftAngle = this.value;
+    renderAllShapes();
+  });
+  document.getElementById('armRightSlide').addEventListener('mousemove', function() {
+    g_armRightAngle = this.value;
+    renderAllShapes();
+  });
+
+  document.getElementById('legLeftSlide').addEventListener('mousemove', function() {
+    g_legLeftAngle = this.value;
+    renderAllShapes();
+  });
+  document.getElementById('legRightSlide').addEventListener('mousemove', function() {
+    g_legRightAngle = this.value;
+    renderAllShapes();
+  });
+
+  document.getElementById('animation').onclick = function() {
+    g_animation = !g_animation;
+  };
+}
+
+function click(ev) {
+  if (ev.shiftKey) {
+    g_poke = !g_poke;
+  }
+}
+
+function tick() {
+  g_seconds = performance.now() / 1000 - g_start;
+  console.log(g_seconds);
+  renderAllShapes();
+  requestAnimationFrame(tick);
 }
 
 function renderAllShapes() {
-  const globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
+  const start = performance.now();
+
+  let globalRotMat = new Matrix4().rotate(g_horzAngle, 0, 1, 0);
+  globalRotMat = globalRotMat.rotate(g_vertAngle, 1, 0, 0);
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.clear(gl.COLOR_BUFFER_BIT);
 
   const body = new Cube();
   body.color = [1, 0, 0, 1];
@@ -141,15 +191,25 @@ function renderAllShapes() {
   leftArm.color = [1, 1, 0, 1];
   leftArm.matrix.setTranslate(0, -0.5, 0);
   leftArm.matrix.rotate(-5, 1, 0, 0);
-  leftArm.matrix.rotate(0, 0, 0, 1);
+  leftArm.matrix.rotate(-g_headHorzAngle, 0, 0, 1);
   leftArm.matrix.scale(0.25, 0.7, 0.5);
   leftArm.matrix.translate(-0.5, 0, 0);
   leftArm.render();
 
   const box = new Cube();
   box.color = [1, 0, 1, 1];
-  box.matrix.translate(-0.1, 0.1, 0, 0);
-  box.matrix.rotate(-30, 1, 0, 0);
-  box.matrix.scale(0.2, 0.4, 0.2);
+  box.matrix = leftArm.matrix;
+  box.matrix.translate(0, 0.7, 0, 0);
+  /*box.matrix.rotate(-30, 1, 0, 0);
+  box.matrix.scale(0.2, 0.4, 0.2);*/
   box.render();
+
+  const duration = performance.now() - start;
+  const indicator = document.getElementById('indicator');
+  if (!indicator) {
+    console.log('Failed to get "indicator" from HTML');
+    return;
+  }
+  indicator.innerHTML = `
+    MS: ${Math.floor(duration)}  //  FPS: ${ Math.floor(10000 / duration) / 10}`;
 }
