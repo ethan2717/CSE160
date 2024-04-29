@@ -114,6 +114,7 @@ let g_legRightAngle = 0;
 // Animation-related global variables
 let g_poke = false;
 let g_animation = false;
+let g_reset = false;
 let g_start = performance.now() / 1000;
 let g_seconds = 0;
 
@@ -166,6 +167,9 @@ function addActionsForHtmlUI() {
   document.getElementById('animation').onclick = function() {
     g_animation = !g_animation;
   };
+  document.getElementById('reset').onclick = function() {
+    g_reset = true;
+  };
 }
 
 function click(ev) {
@@ -176,9 +180,60 @@ function click(ev) {
 
 function tick() {
   g_seconds = performance.now() / 1000 - g_start;
-  console.log(g_seconds);
+  // console.log(g_seconds);
+  updateAnimationAngles();
   renderAllShapes();
   requestAnimationFrame(tick);
+}
+
+function updateAnimationAngles() {
+  if (g_animation) {
+    g_earLeftAngle = animate(15);
+    g_earRightAngle = animate(15);
+    g_headHorzAngle = animate(10);
+    g_headVertAngle = animate(10);
+    g_armLeftAngle = animate(50);
+    g_armRightAngle = animate(50);
+    g_legLeftAngle = animate(40);
+    g_legRightAngle = animate(40);
+  }
+  if (g_poke) {
+    g_earLeftAngle = animate(180);
+    g_earRightAngle = animate(180);
+    g_headHorzAngle = animate(180);
+    g_headVertAngle = animate(180);
+    g_armLeftAngle = animate(180);
+    g_armRightAngle = animate(180);
+    g_legLeftAngle = animate(180);
+    g_legRightAngle = animate(180);
+  } 
+  if (!g_animation && !g_poke) {
+    g_earLeftAngle = g_earLeftAngle;
+    g_earRightAngle = g_earRightAngle;
+    g_headHorzAngle = g_headHorzAngle;
+    g_headVertAngle = g_headVertAngle;
+    g_armLeftAngle = g_armLeftAngle;
+    g_armRightAngle = g_armRightAngle;
+    g_legLeftAngle = g_legLeftAngle;
+    g_legRightAngle = g_legRightAngle;
+  }
+  if (g_reset) {
+    g_horzAngle = 0;
+    g_vertAngle = 0;
+    g_earLeftAngle = 0;
+    g_earRightAngle = 0;
+    g_headHorzAngle = 0;
+    g_headVertAngle = 0;
+    g_armLeftAngle = 0;
+    g_armRightAngle = 0;
+    g_legLeftAngle = 0;
+    g_legRightAngle = 0;
+    g_reset = false;
+  }
+}
+
+function animate(num) {
+  return num * Math.sin(g_seconds * 2);
 }
 
 function renderAllShapes() {
