@@ -6,6 +6,7 @@
   </head>
 
   <body onload="main()">
+    <h3>Inspiration: Piglet from Winnie-the-Pooh</h3>
     <canvas id="webgl" width="400" height="400">
     Please use a browser that supports "canvas"
     </canvas>
@@ -13,11 +14,15 @@
     <p id="indicator">MS: _  //  FPS: _</p>
     <p>
       Camera Angle:
-      (horizontal) <input type="range" min="-180" max="180" value="5" class="slider" id="horzSlide">
-      (vertical) <input type="range" min="-180" max="180" value="5" class="slider" id="vertSlide">
+      (horizontal) <input type="range" min="-180" max="180" value="0" class="slider" id="horzSlide">
+      (vertical) <input type="range" min="-180" max="180" value="0" class="slider" id="vertSlide">
     </p>
     <p>
       Body Parts:
+      <br>
+      Ears:
+      (left) <input type="range", min="-35" max="20" value="0" class="slider" id="earLeftSlide">
+      (right) <input type="range", min="-20" max="20" value="0" class="slider" id="earRightSlide">
       <br>
       Head:
       (side to side) <input type="range", min="-30" max="10" value="0" class="slider" id="headHorzSlide">

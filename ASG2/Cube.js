@@ -24,7 +24,7 @@ class Cube {
         drawCube(this.frontBack, new Float32Array(front.concat(back)));
 
         // lighting, then drawing for top & bottom
-        gl.uniform4f(u_FragColor, rgba[0]*1.9, rgba[1]*1.9, rgba[2]*1.9, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*0.9, rgba[1]*0.9, rgba[2]*0.9, rgba[3]);
         const top = [0,1,0, 0,1,1, 1,1,1,  0,1,0, 1,1,1, 1,1,0];
         const bottom = [0,0,0, 0,0,1, 1,0,1,  1,0,1, 0,0,0, 1,0,0];
         drawCube(this.topBottom, new Float32Array(top.concat(bottom)));
