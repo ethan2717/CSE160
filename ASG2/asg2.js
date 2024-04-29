@@ -180,7 +180,7 @@ function click(ev) {
 
 function tick() {
   g_seconds = performance.now() / 1000 - g_start;
-  // console.log(g_seconds);
+  console.log(g_seconds);
   updateAnimationAngles();
   renderAllShapes();
   requestAnimationFrame(tick);
@@ -206,18 +206,10 @@ function updateAnimationAngles() {
     g_armRightAngle = animate(180);
     g_legLeftAngle = animate(180);
     g_legRightAngle = animate(180);
-  } 
-  if (!g_animation && !g_poke) {
-    g_earLeftAngle = g_earLeftAngle;
-    g_earRightAngle = g_earRightAngle;
-    g_headHorzAngle = g_headHorzAngle;
-    g_headVertAngle = g_headVertAngle;
-    g_armLeftAngle = g_armLeftAngle;
-    g_armRightAngle = g_armRightAngle;
-    g_legLeftAngle = g_legLeftAngle;
-    g_legRightAngle = g_legRightAngle;
   }
   if (g_reset) {
+    g_animation = false;
+    g_poke = false;
     g_horzAngle = 0;
     g_vertAngle = 0;
     g_earLeftAngle = 0;
