@@ -20,6 +20,7 @@ const FSHADER_SOURCE = `
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
+  uniform sampler2D u_Sampler1;
   uniform int u_whichTexture;
   void main() {
     if (u_whichTexture == -2) {
@@ -28,6 +29,8 @@ const FSHADER_SOURCE = `
       gl_FragColor = vec4(v_UV, 1.0, 1.0);
     } else if (u_whichTexture == 0) {
       gl_FragColor = texture2D(u_Sampler0, v_UV);
+    } else if (u_whichTexture == 1) {
+      gl_FragColor = texture2D(u_Sampler1, v_UV);
     } else {
       gl_FragColor = vec4(1, 0.2, 0.2, 1);
     }
@@ -44,6 +47,7 @@ let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 let u_Sampler0;
+let u_Sampler1;
 let u_whichTexture;
 
 function setupWebGL() {
@@ -118,6 +122,13 @@ function connectVariablesToGLSL() {
     return false;
   }
 
+  // Get the storage location of u_Sampler1
+  u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+  if (!u_Sampler1) {
+    console.log('Failed to get the storage location of u_Sampler1');
+    return false;
+  }
+
   const identityMat = new Matrix4();
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityMat.elements);
 }
@@ -148,24 +159,6 @@ function addActionsForHtmlUI() {
   });
   document.getElementById('vertSlide').addEventListener('mousemove', function() {
     g_vertAngle = this.value;
-    renderAllShapes();
-  });
-
-  document.getElementById('earLeftSlide').addEventListener('mousemove', function() {
-    g_earLeftAngle = this.value;
-    renderAllShapes();
-  });
-  document.getElementById('earRightSlide').addEventListener('mousemove', function() {
-    g_earRightAngle = this.value;
-    renderAllShapes();
-  });
-
-  document.getElementById('headHorzSlide').addEventListener('mousemove', function() {
-    g_headHorzAngle = this.value;
-    renderAllShapes();
-  });
-  document.getElementById('headVertSlide').addEventListener('mousemove', function() {
-    g_headVertAngle = this.value;
     renderAllShapes();
   });
 
@@ -204,7 +197,8 @@ function main() {
 
   addActionsForHtmlUI();
 
-  initTextures();
+  initTextures0();
+  initTextures1();
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -219,7 +213,7 @@ function main() {
   requestAnimationFrame(tick);
 }
 
-function initTextures() {
+function initTextures0() {
   const image = new Image();  // Create the image object
   if (!image) {
     console.log('Failed to create the image object');
@@ -228,7 +222,7 @@ function initTextures() {
   // Register the event handler to be called on loading an image
   image.onload = function(){ sendImageToTEXTURE0(image); };
   // Tell the browser to load an image
-  image.src = './sky.jpg';
+  image.src = './grass.png';
 
   return true;
 }
@@ -253,7 +247,44 @@ function sendImageToTEXTURE0(image) {
   
   // Set the texture unit 0 to the sampler
   gl.uniform1i(u_Sampler0, 0);
-  console.log('Finished loading texture');
+  console.log('Finished loading texture 0');
+}
+
+function initTextures1() {
+  const image = new Image();  // Create the image object
+  if (!image) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+  // Register the event handler to be called on loading an image
+  image.onload = function(){ sendImageToTEXTURE1(image); };
+  // Tell the browser to load an image
+  image.src = './stone.jpg';
+
+  return true;
+}
+
+function sendImageToTEXTURE1(image) {
+  const texture = gl.createTexture();   // Create a texture object
+  if (!texture) {
+    console.log('Failed to create the texture object');
+    return false;
+  }
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+  // Enable texture unit0
+  gl.activeTexture(gl.TEXTURE0);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler1, 0);
+  console.log('Finished loading texture 1');
 }
 
 function click(ev) {
@@ -327,94 +358,26 @@ function renderAllShapes() {
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  // colors
-  const lightPink = [1.0, 0.8, 1.0, 1.0];
-	const pink = [1.0, 0.6, 1.0, 1.0];
-	const darkPink = [0.9, 0.01, 0.6, 1.0];
-  const black = [0.0, 0.0, 0.0, 1.0];
-	
-	// head
-	const head = new Cube();
-	head.color = lightPink;
-	head.matrix.translate(-0.225, 0.4, -0.05);
-	head.matrix.rotate(g_headHorzAngle, 0, 1, 0);
-	head.matrix.rotate(g_headVertAngle, 1, 0, 0);
-	head.matrix.scale(0.45, 0.35, 0.4);
-	head.render();
+  const ground = new Cube();
+  ground.color = [0, 0.6, 0.1, 1];
+  ground.matrix.translate(0, -0.75, 0);
+  ground.matrix.scale(200, -0.1, 200);
+  ground.matrix.translate(-0.5, 0, -0.5);
+  ground.render();
 
-	// left ear
-	const leftEar = new Cube();
-	leftEar.matrix = new Matrix4(head.matrix);
-	leftEar.color = lightPink;
-	leftEar.matrix.rotate(-g_earLeftAngle, 0, 1, 0);
-	leftEar.matrix.translate(-0.05, 0.8, 0.0);
-	leftEar.matrix.scale(0.2, 0.4, 0.2);
-	leftEar.render();
-
-	const leftInEar = new Cube();
-	leftInEar.matrix = new Matrix4(leftEar.matrix);
-	leftInEar.color = pink;
-	leftInEar.matrix.translate(0.2, 0.0, -0.3);
-	leftInEar.matrix.scale(0.6, 0.7, 0.3);
-	leftInEar.render();
-
-	// right ear
-	const rightEar = new Cube();
-	rightEar.matrix = new Matrix4(head.matrix);
-	rightEar.color = lightPink;
-	rightEar.matrix.translate(0.85, 0.8, 0.0);
-	rightEar.matrix.rotate(g_earRightAngle, 0, -1, 0);
-	rightEar.matrix.scale(0.2, 0.4, 0.2);
-	rightEar.render();
-
-	const rightInEar = new Cube();
-	rightInEar.matrix = new Matrix4(rightEar.matrix);
-	rightInEar.color = pink;
-	rightInEar.matrix.translate(0.2, 0.0, -0.3);
-	rightInEar.matrix.scale(0.6, 0.7, 0.3);
-	rightInEar.render();
-
-	// face
-	const leftEye = new Cube();
-	leftEye.matrix = new Matrix4(head.matrix);
-	leftEye.color = black;
-	leftEye.matrix.translate(0.3, 0.55, 0.01);
-	leftEye.matrix.scale(0.05, 0.1, -0.02);
-	leftEye.render();
-
-	const rightEye = new Cube();
-	rightEye.matrix = new Matrix4(head.matrix);
-	rightEye.color = black;
-	rightEye.matrix.translate(0.65, 0.55, 0.01);
-	rightEye.matrix.scale(0.05, 0.1, -0.02);
-	rightEye.render();
-
-	const mouth = new Cube();
-	mouth.matrix = new Matrix4(head.matrix);
-	mouth.color = black;
-	mouth.matrix.translate(0.35, 0.2, -0.01);
-	mouth.matrix.scale(0.3, 0.1, 0.01);
-	mouth.render();
-
-  const lip = new Cube();
-	lip.matrix = new Matrix4(mouth.matrix);
-	lip.color = lightPink;
-	lip.matrix.translate(0.175, 0.6, -0.01);
-	lip.matrix.scale(0.65, 0.45, 0.01);
-	lip.render();
-
-	const nose = new Cube();
-	nose.matrix = new Matrix4(head.matrix);
-	nose.color = darkPink;
-	nose.matrix.translate(0.425, 0.35, -0.01);
-	nose.matrix.scale(0.15, 0.15, -0.05);
-	nose.render();
+  const sky = new Cube();
+  sky.color = [0.4, 0.8, 1, 1];
+  sky.matrix.scale(200, 200, 200);
+  sky.matrix.translate(-0.5, -0.1, -0.5);
+  sky.render();
 
 	// body
 	const body = new Cube();
-	body.color = darkPink;
+  body.color = [0.1, 0.1, 0.1, 1];
+	body.textureNum = 1;
 	body.matrix.rotate(0, 1, 1, 1);
 	body.matrix.translate(-0.25, -0.25, 0.0);
 	body.matrix.scale(0.5, 0.65, 0.3);
@@ -422,7 +385,8 @@ function renderAllShapes() {
 
   // arms
 	const leftArm = new Cube();
-	leftArm.color = lightPink;
+  leftArm.color = [0.1, 0.1, 0.1, 1];
+	leftArm.textureNum = 0;
 	leftArm.matrix.rotate(-180, 0, 0, 1);
 	leftArm.matrix.translate(0.25, -0.3, -0.025);
 	leftArm.matrix.rotate(g_armLeftAngle, 1, 0, 0);
@@ -430,7 +394,8 @@ function renderAllShapes() {
 	leftArm.render();
 
 	const rightArm = new Cube();
-	rightArm.color = lightPink;
+  rightArm.color = [0.1, 0.1, 0.1, 1];
+	rightArm.textureNum = 0;
 	rightArm.matrix.rotate(-180, 0, 0, 1);
 	rightArm.matrix.translate(-0.375, -0.3, -0.025);
 	rightArm.matrix.rotate(g_armRightAngle, -1, 0, 0);
@@ -439,14 +404,14 @@ function renderAllShapes() {
 
 	// legs
 	const leftLeg = new Cube();
-	leftLeg.color = lightPink;
+	leftLeg.color = [1, 1, 0, 1];
 	leftLeg.matrix.rotate(g_legLeftAngle, 1, 0, 0);
 	leftLeg.matrix.translate(-0.175, -0.65, 0.0);
 	leftLeg.matrix.scale(0.15, 0.5, 0.325);
 	leftLeg.render();
 
 	const rightLeg = new Cube();
-	rightLeg.color = lightPink;
+	rightLeg.color = [1, 1, 0, 1];
 	rightLeg.matrix.rotate(g_legRightAngle, -1, 0, 0);
 	rightLeg.matrix.translate(0.03, -0.65, 0.0);
 	rightLeg.matrix.scale(0.15, 0.5, 0.325);
