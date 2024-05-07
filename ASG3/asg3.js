@@ -129,6 +129,12 @@ function connectVariablesToGLSL() {
     return false;
   }
 
+  u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+  if (!u_whichTexture) {
+    console.log('Failed to get the storage location of u_whichTexture');
+    return;
+  }
+
   const identityMat = new Matrix4();
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityMat.elements);
 }
@@ -136,10 +142,6 @@ function connectVariablesToGLSL() {
 // More global variables
 let g_horzAngle = 0;
 let g_vertAngle = 0;
-let g_earLeftAngle = 0;
-let g_earRightAngle = 0;
-let g_headHorzAngle = 0;
-let g_headVertAngle = 0;
 let g_armLeftAngle = 0;
 let g_armRightAngle = 0;
 let g_legLeftAngle = 0;
@@ -222,7 +224,7 @@ function initTextures0() {
   // Register the event handler to be called on loading an image
   image.onload = function(){ sendImageToTEXTURE0(image); };
   // Tell the browser to load an image
-  image.src = './grass.png';
+  image.src = './lava.jpg';
 
   return true;
 }
@@ -259,7 +261,7 @@ function initTextures1() {
   // Register the event handler to be called on loading an image
   image.onload = function(){ sendImageToTEXTURE1(image); };
   // Tell the browser to load an image
-  image.src = './stone.jpg';
+  image.src = './stone.png';
 
   return true;
 }
@@ -273,7 +275,7 @@ function sendImageToTEXTURE1(image) {
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
   // Enable texture unit0
-  gl.activeTexture(gl.TEXTURE0);
+  gl.activeTexture(gl.TEXTURE1);
   // Bind the texture object to the target
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -283,7 +285,7 @@ function sendImageToTEXTURE1(image) {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
   
   // Set the texture unit 0 to the sampler
-  gl.uniform1i(u_Sampler1, 0);
+  gl.uniform1i(u_Sampler1, 1);
   console.log('Finished loading texture 1');
 }
 
@@ -347,6 +349,7 @@ function renderAllShapes() {
   const start = performance.now();
 
   const projMat = new Matrix4();
+  // projMat.setPerspective(50, canvas.width/canvas.height, 0.1, 1000);
   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
   const viewMat = new Matrix4();
@@ -363,21 +366,19 @@ function renderAllShapes() {
 
   const ground = new Cube();
   ground.color = [0, 0.6, 0.1, 1];
-  ground.matrix.translate(0, -0.75, 0);
-  ground.matrix.scale(200, -0.1, 200);
-  ground.matrix.translate(-0.5, 0, -0.5);
+  ground.matrix.translate(-1, -0.6, -1);
+  ground.matrix.scale(2, -0.5, 0.1);
   ground.render();
 
   const sky = new Cube();
   sky.color = [0.4, 0.8, 1, 1];
-  sky.matrix.scale(200, 200, 200);
-  sky.matrix.translate(-0.5, -0.1, -0.5);
+  sky.matrix.translate(-1, -0.5, -0.5);
+  sky.matrix.scale(3, 3, 3);
   sky.render();
 
 	// body
 	const body = new Cube();
-  body.color = [0.1, 0.1, 0.1, 1];
-	body.textureNum = 1;
+	body.textureNum = 0;
 	body.matrix.rotate(0, 1, 1, 1);
 	body.matrix.translate(-0.25, -0.25, 0.0);
 	body.matrix.scale(0.5, 0.65, 0.3);
@@ -385,8 +386,7 @@ function renderAllShapes() {
 
   // arms
 	const leftArm = new Cube();
-  leftArm.color = [0.1, 0.1, 0.1, 1];
-	leftArm.textureNum = 0;
+	leftArm.textureNum = 1;
 	leftArm.matrix.rotate(-180, 0, 0, 1);
 	leftArm.matrix.translate(0.25, -0.3, -0.025);
 	leftArm.matrix.rotate(g_armLeftAngle, 1, 0, 0);
@@ -394,8 +394,7 @@ function renderAllShapes() {
 	leftArm.render();
 
 	const rightArm = new Cube();
-  rightArm.color = [0.1, 0.1, 0.1, 1];
-	rightArm.textureNum = 0;
+	rightArm.textureNum = 1;
 	rightArm.matrix.rotate(-180, 0, 0, 1);
 	rightArm.matrix.translate(-0.375, -0.3, -0.025);
 	rightArm.matrix.rotate(g_armRightAngle, -1, 0, 0);

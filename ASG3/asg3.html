@@ -6,6 +6,7 @@
   </head>
 
   <body onload="main()">
+    <h3>Headless textured creature with golden legs</h3>
     <canvas id="webgl" width="400" height="400">
     Please use a browser that supports "canvas"
     </canvas>
@@ -34,6 +35,40 @@
     <p>
       Shift-click to poke and unpoke.
       <button type="button" id="reset">Reset</button>
+    </p>
+    <style>
+      table, td, th {
+        border: 1px solid;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+    </style>
+    <p>
+      <i>Grader notes:</i>
+      <table>
+        <tr>
+          <th>Criteria</th>
+          <th>Note</th>
+        </tr>
+        <tr>
+          <td>ground and sky</td>
+          <td>green ground is present, as is light blue sky</td>
+        </tr>
+        <tr>
+          <td>texture working</td>
+          <td>lava texture on body of creature</td>
+        </tr>
+        <tr>
+          <td>texture on some objects, color on others</td>
+          <td>lava and stone texture, and golden-colored legs</td>
+        </tr>
+        <tr>
+          <td>multiple textures</td>
+          <td>lava texture on body and stone texture on arms</td>
+        </tr>
+      </table>
     </p>
 
     <script src="../lib/webgl-utils.js"></script>

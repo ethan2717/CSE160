@@ -5,11 +5,33 @@ class Cube {
         this.matrix = new Matrix4();
         this.textureNum = -2;
         this.buff = gl.createBuffer();
+        this.mat = new Float32Array(this.createMatrix());
         this.uvBuff = gl.createBuffer();
+        this.uvMat = new Float32Array(this.createUVMatrix());
         if (!this.buff || !this.uvBuff) {
             console.log('Failed to create buffer');
             return;
         }
+    }
+
+    createMatrix() {
+        const front = [0,0,0, 1,1,0, 1,0,0,  0,0,0, 0,1,0, 1,1,0];
+        const back = [1,1,1, 0,0,1, 0,1,1,  1,0,1, 1,1,1, 0,0,1];
+        const top = [0,1,0, 0,1,1, 1,1,1,  0,1,0, 1,1,1, 1,1,0];
+        const bottom = [0,0,0, 0,0,1, 1,0,1,  1,0,1, 0,0,0, 1,0,0];
+        const left = [0,0,1, 0,1,1, 0,0,0,  0,1,0, 0,0,0, 0,1,1];
+        const right = [1,0,1, 1,1,1, 1,0,0,  1,1,0, 1,0,0, 1,1,1];
+        return front.concat(back).concat(top.concat(bottom)).concat(left.concat(right));
+    }
+
+    createUVMatrix() {
+        const frontUV = [0,0, 1,1, 1,0,  0,0, 0,1, 1,1];
+        const backUV = [0,0, 1,1, 1,0,  0,0, 0,1, 1,1];
+        const topUV = [0,0, 0,1, 1,1,  0,0, 1,1, 1,0];
+        const bottomUV = [0,0, 0,1, 1,1,  0,0, 1,1, 1,0];
+        const leftUV = [1,0, 1,1, 0,0,  0,0, 0,1, 1,1];
+        const rightUV = [1,0, 1,1, 0,0,  0,0, 0,1, 1,1];
+        return frontUV.concat(backUV).concat(topUV.concat(bottomUV)).concat(leftUV.concat(rightUV));
     }
 
     render() {
@@ -17,25 +39,8 @@ class Cube {
         gl.uniform1i(u_whichTexture, this.textureNum);
         gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
-        const front = [0,0,0, 1,1,0, 1,0,0,  0,0,0, 0,1,0, 1,1,0];
-        const back = [1,1,1, 0,0,1, 0,1,1,  1,0,1, 1,1,1, 0,0,1];
-        const frontUV = [0,0, 1,1, 1,0,  0,0, 0,1, 1,1];
-        const backUV = [0,0, 1,1, 1,0,  0,0, 0,1, 1,1];
-        const top = [0,1,0, 0,1,1, 1,1,1,  0,1,0, 1,1,1, 1,1,0];
-        const bottom = [0,0,0, 0,0,1, 1,0,1,  1,0,1, 0,0,0, 1,0,0];
-        const topUV = [0,0, 0,1, 1,1,  0,0, 1,1, 1,0];
-        const bottomUV = [0,0, 0,1, 1,1,  0,0, 1,1, 1,0];
-        const left = [0,0,1, 0,1,1, 0,0,0,  0,1,0, 0,0,0, 0,1,1];
-        const right = [1,0,1, 1,1,1, 1,0,0,  1,1,0, 1,0,0, 1,1,1];
-        const leftUV = [1,0, 1,1, 0,0,  0,0, 0,1, 1,1];
-        const rightUV = [1,0, 1,1, 0,0,  0,0, 0,1, 1,1];
-
         gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-        drawCubeUV(this.buff,
-            new Float32Array(front.concat(back).concat(top.concat(bottom)).concat(left.concat(right))),
-            this.uvBuff,
-            new Float32Array(frontUV.concat(backUV).concat(topUV.concat(bottomUV)).concat(leftUV.concat(rightUV))),
-        );
+        drawCubeUV(this.buff, this.mat, this.uvBuff, this.uvMat);
 
         /* drawCube(this.buff, new Float32Array(front.concat(back)));
 
