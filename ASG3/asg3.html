@@ -12,61 +12,44 @@
     </canvas>
 
     <p id="indicator">MS: _  //  FPS: _</p>
-    <p>
-      Camera Angle:
-      (horizontal) <input type="range" min="-180" max="180" value="0" class="slider" id="horzSlide">
-      (vertical) <input type="range" min="-180" max="180" value="0" class="slider" id="vertSlide">
-    </p>
-    <p>
-      Body Parts:
-      <br>
-      Arms:
-      (left) <input type="range", min="-60" max="90" value="0" class="slider" id="armLeftSlide">
-      (right) <input type="range", min="-60" max="90" value="0" class="slider" id="armRightSlide">
-      <br>
-      Legs:
-      (left) <input type="range", min="-30" max="90" value="0" class="slider" id="legLeftSlide">
-      (right) <input type="range", min="-30" max="90" value="0" class="slider" id="legRightSlide">
-    </p>
-    <p>
-      Animation:
-      <button type="button" id="animation">Play / Pause</button>
-    </p>
-    <p>
-      Shift-click to poke and unpoke.
-      <button type="button" id="reset">Reset</button>
-    </p>
     <style>
       table, td, th {
         border: 1px solid;
       }
       table {
-        width: 100%;
         border-collapse: collapse;
       }
     </style>
     <p>
-      <i>Grader notes:</i>
+      <i>Controls:</i>
       <table>
         <tr>
-          <th>Criteria</th>
-          <th>Note</th>
+          <th>Key</th>
+          <th>Function</th>
         </tr>
         <tr>
-          <td>ground and sky</td>
-          <td>green ground is present, as is light blue sky</td>
+          <td>W</td>
+          <td>move forward</td>
         </tr>
         <tr>
-          <td>texture working</td>
-          <td>lava texture on body of creature</td>
+          <td>A</td>
+          <td>move left</td>
         </tr>
         <tr>
-          <td>texture on some objects, color on others</td>
-          <td>lava and stone texture, and golden-colored legs</td>
+          <td>S</td>
+          <td>move backward</td>
         </tr>
         <tr>
-          <td>multiple textures</td>
-          <td>lava texture on body and stone texture on arms</td>
+          <td>D</td>
+          <td>move right</td>
+        </tr>
+        <tr>
+          <td>Q</td>
+          <td>pan left</td>
+        </tr>
+        <tr>
+          <td>E</td>
+          <td>pan right</td>
         </tr>
       </table>
     </p>
@@ -75,6 +58,7 @@
     <script src="../lib/webgl-debug.js"></script>
     <script src="../lib/cuon-utils.js"></script>
     <script src="../lib/cuon-matrix.js"></script>
+    <script src="Camera.js"></script>
     <script src="Cube.js"></script>
     <script src="asg3.js"></script>
   </body>

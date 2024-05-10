@@ -21,6 +21,10 @@ const FSHADER_SOURCE = `
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
   uniform sampler2D u_Sampler1;
+  uniform sampler2D u_Sampler2;
+  uniform sampler2D u_Sampler3;
+  uniform sampler2D u_Sampler4;
+  uniform sampler2D u_Sampler5;
   uniform int u_whichTexture;
   void main() {
     if (u_whichTexture == -2) {
@@ -31,6 +35,14 @@ const FSHADER_SOURCE = `
       gl_FragColor = texture2D(u_Sampler0, v_UV);
     } else if (u_whichTexture == 1) {
       gl_FragColor = texture2D(u_Sampler1, v_UV);
+    } else if (u_whichTexture == 2) {
+      gl_FragColor = texture2D(u_Sampler2, v_UV);
+    } else if (u_whichTexture == 3) {
+      gl_FragColor = texture2D(u_Sampler3, v_UV);
+    } else if (u_whichTexture == 4) {
+      gl_FragColor = texture2D(u_Sampler4, v_UV);
+    } else if (u_whichTexture == 5) {
+      gl_FragColor = texture2D(u_Sampler5, v_UV);
     } else {
       gl_FragColor = vec4(1, 0.2, 0.2, 1);
     }
@@ -48,6 +60,10 @@ let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 let u_Sampler0;
 let u_Sampler1;
+let u_Sampler2;
+let u_Sampler3;
+let u_Sampler4;
+let u_Sampler5;
 let u_whichTexture;
 
 function setupWebGL() {
@@ -121,11 +137,29 @@ function connectVariablesToGLSL() {
     console.log('Failed to get the storage location of u_Sampler0');
     return false;
   }
-
-  // Get the storage location of u_Sampler1
   u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
   if (!u_Sampler1) {
     console.log('Failed to get the storage location of u_Sampler1');
+    return false;
+  }
+  u_Sampler2 = gl.getUniformLocation(gl.program, 'u_Sampler2');
+  if (!u_Sampler2) {
+    console.log('Failed to get the storage location of u_Sampler2');
+    return false;
+  }
+  u_Sampler3 = gl.getUniformLocation(gl.program, 'u_Sampler3');
+  if (!u_Sampler3) {
+    console.log('Failed to get the storage location of u_Sampler3');
+    return false;
+  }
+  u_Sampler4 = gl.getUniformLocation(gl.program, 'u_Sampler4');
+  if (!u_Sampler4) {
+    console.log('Failed to get the storage location of u_Sampler4');
+    return false;
+  }
+  u_Sampler5 = gl.getUniformLocation(gl.program, 'u_Sampler5');
+  if (!u_Sampler5) {
+    console.log('Failed to get the storage location of u_Sampler5');
     return false;
   }
 
@@ -140,21 +174,13 @@ function connectVariablesToGLSL() {
 }
 
 // More global variables
+let g_camera = new Camera();
 let g_horzAngle = 0;
 let g_vertAngle = 0;
-let g_armLeftAngle = 0;
-let g_armRightAngle = 0;
-let g_legLeftAngle = 0;
-let g_legRightAngle = 0;
-
-// Animation-related global variables
-let g_poke = false;
-let g_animation = false;
-let g_reset = false;
 let g_start = performance.now() / 1000;
 let g_seconds = 0;
 
-function addActionsForHtmlUI() {
+/* function addActionsForHtmlUI() {
   document.getElementById('horzSlide').addEventListener('mousemove', function() {
     g_horzAngle = this.value;
     renderAllShapes();
@@ -188,7 +214,7 @@ function addActionsForHtmlUI() {
   document.getElementById('reset').onclick = function() {
     g_reset = true;
   };
-}
+} */
 
 // ### MAIN ############
 function main() {
@@ -197,10 +223,9 @@ function main() {
 
   connectVariablesToGLSL();
 
-  addActionsForHtmlUI();
+  // addActionsForHtmlUI();
 
-  initTextures0();
-  initTextures1();
+  initTextures();
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -211,25 +236,66 @@ function main() {
       click(ev);
     }
   };
+  document.onkeydown = keydown;
 
   requestAnimationFrame(tick);
 }
 
-function initTextures0() {
-  const image = new Image();  // Create the image object
-  if (!image) {
+function keydown(ev) {
+  switch(ev.keyCode) {
+    case 87: // W
+      g_camera.goForward();
+      break;
+    case 65: // A
+      g_camera.goLeft();
+      break;
+    case 83: // S
+      g_camera.goBackward();
+      break;
+    case 68: // D
+      g_camera.goRight();
+      break;
+    case 81: // Q
+      g_camera.turn(2);
+      break;
+    case 69: // E
+      g_camera.turn(-2);
+      break;
+  }
+}
+
+function initTextures() {
+  const image0 = new Image();  // Create the image object
+  const image1 = new Image();
+  const image2 = new Image();
+  const image3 = new Image();
+  const image4 = new Image();
+  const image5 = new Image();
+  if (!image0 || !image1 || !image2 || !image3 || !image4 || !image5) {
     console.log('Failed to create the image object');
     return false;
   }
+
   // Register the event handler to be called on loading an image
-  image.onload = function(){ sendImageToTEXTURE0(image); };
+  image0.onload = () => { sendImageToTEXTURE(gl.TEXTURE0, image0, u_Sampler0, 0); };
+  image1.onload = () => { sendImageToTEXTURE(gl.TEXTURE1, image1, u_Sampler1, 1); };
+  image2.onload = () => { sendImageToTEXTURE(gl.TEXTURE2, image2, u_Sampler2, 2); };
+  image3.onload = () => { sendImageToTEXTURE(gl.TEXTURE3, image3, u_Sampler3, 3); };
+  image4.onload = () => { sendImageToTEXTURE(gl.TEXTURE4, image4, u_Sampler4, 4); };
+  image5.onload = () => { sendImageToTEXTURE(gl.TEXTURE5, image5, u_Sampler5, 5); };
+
   // Tell the browser to load an image
-  image.src = './lava.jpg';
+  image0.src = './diamond.png';
+  image1.src = './lava.jpg';
+  image2.src = './stone.png';
+  image3.src = './tnt.png';
+  image4.src = './wood.jpg';
+  image5.src = './sand.jpg';
 
   return true;
 }
 
-function sendImageToTEXTURE0(image) {
+function sendImageToTEXTURE(actTex, image, sampler, num) {
   const texture = gl.createTexture();   // Create a texture object
   if (!texture) {
     console.log('Failed to create the texture object');
@@ -238,7 +304,7 @@ function sendImageToTEXTURE0(image) {
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
   // Enable texture unit0
-  gl.activeTexture(gl.TEXTURE0);
+  gl.activeTexture(actTex); // <--
   // Bind the texture object to the target
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -248,45 +314,8 @@ function sendImageToTEXTURE0(image) {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
   
   // Set the texture unit 0 to the sampler
-  gl.uniform1i(u_Sampler0, 0);
-  console.log('Finished loading texture 0');
-}
-
-function initTextures1() {
-  const image = new Image();  // Create the image object
-  if (!image) {
-    console.log('Failed to create the image object');
-    return false;
-  }
-  // Register the event handler to be called on loading an image
-  image.onload = function(){ sendImageToTEXTURE1(image); };
-  // Tell the browser to load an image
-  image.src = './stone.png';
-
-  return true;
-}
-
-function sendImageToTEXTURE1(image) {
-  const texture = gl.createTexture();   // Create a texture object
-  if (!texture) {
-    console.log('Failed to create the texture object');
-    return false;
-  }
-
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
-  // Enable texture unit0
-  gl.activeTexture(gl.TEXTURE1);
-  // Bind the texture object to the target
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-
-  // Set the texture parameters
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  // Set the texture image
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-  
-  // Set the texture unit 0 to the sampler
-  gl.uniform1i(u_Sampler1, 1);
-  console.log('Finished loading texture 1');
+  gl.uniform1i(sampler, num); // <--
+  console.log(`Finished loading texture ${num}`);
 }
 
 function click(ev) {
@@ -298,62 +327,22 @@ function click(ev) {
 function tick() {
   g_seconds = performance.now() / 1000 - g_start;
   // console.log(g_seconds);
-  updateAnimationAngles();
   renderAllShapes();
   requestAnimationFrame(tick);
-}
-
-function updateAnimationAngles() {
-  if (g_animation) {
-    g_earLeftAngle = animate(15);
-    g_earRightAngle = animate(15);
-    g_headHorzAngle = animate(10);
-    g_headVertAngle = animate(10);
-    g_armLeftAngle = animate(50);
-    g_armRightAngle = animate(50);
-    g_legLeftAngle = animate(40);
-    g_legRightAngle = animate(40);
-  }
-  if (g_poke) {
-    g_earLeftAngle = animate(180);
-    g_earRightAngle = animate(180);
-    g_headHorzAngle = animate(180);
-    g_headVertAngle = animate(180);
-    g_armLeftAngle = animate(180);
-    g_armRightAngle = animate(180);
-    g_legLeftAngle = animate(180);
-    g_legRightAngle = animate(180);
-  }
-  if (g_reset) {
-    g_animation = false;
-    g_poke = false;
-    g_horzAngle = 0;
-    g_vertAngle = 0;
-    g_earLeftAngle = 0;
-    g_earRightAngle = 0;
-    g_headHorzAngle = 0;
-    g_headVertAngle = 0;
-    g_armLeftAngle = 0;
-    g_armRightAngle = 0;
-    g_legLeftAngle = 0;
-    g_legRightAngle = 0;
-    g_reset = false;
-  }
-}
-
-function animate(num) {
-  return num * Math.sin(g_seconds * 2);
 }
 
 function renderAllShapes() {
   const start = performance.now();
 
   const projMat = new Matrix4();
-  // projMat.setPerspective(50, canvas.width/canvas.height, 0.1, 1000);
+  projMat.setPerspective(50, canvas.width/canvas.height, 0.1, 100);
   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
   const viewMat = new Matrix4();
-  viewMat.setLookAt(0,0,-1, 0,0,0, 0,1,0);
+  const [eye1, eye2, eye3] = g_camera.eye.elements;
+  const [at1, at2, at3] = g_camera.at.elements;
+  const [up1, up2, up3] = g_camera.up.elements;
+  viewMat.setLookAt(eye1, eye2, eye3, at1, at2, at3, up1, up2, up3);
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
 
   let globalRotMat = new Matrix4().rotate(g_horzAngle, 0, 1, 0);
@@ -389,7 +378,7 @@ function renderAllShapes() {
 	leftArm.textureNum = 1;
 	leftArm.matrix.rotate(-180, 0, 0, 1);
 	leftArm.matrix.translate(0.25, -0.3, -0.025);
-	leftArm.matrix.rotate(g_armLeftAngle, 1, 0, 0);
+	leftArm.matrix.rotate(0, 1, 0, 0);
 	leftArm.matrix.scale(0.125, 0.45, 0.35);
 	leftArm.render();
 
@@ -397,21 +386,21 @@ function renderAllShapes() {
 	rightArm.textureNum = 1;
 	rightArm.matrix.rotate(-180, 0, 0, 1);
 	rightArm.matrix.translate(-0.375, -0.3, -0.025);
-	rightArm.matrix.rotate(g_armRightAngle, -1, 0, 0);
+	rightArm.matrix.rotate(0, -1, 0, 0);
 	rightArm.matrix.scale(0.125, 0.45, 0.35);
 	rightArm.render();
 
 	// legs
 	const leftLeg = new Cube();
 	leftLeg.color = [1, 1, 0, 1];
-	leftLeg.matrix.rotate(g_legLeftAngle, 1, 0, 0);
+	leftLeg.matrix.rotate(0, 1, 0, 0);
 	leftLeg.matrix.translate(-0.175, -0.65, 0.0);
 	leftLeg.matrix.scale(0.15, 0.5, 0.325);
 	leftLeg.render();
 
 	const rightLeg = new Cube();
 	rightLeg.color = [1, 1, 0, 1];
-	rightLeg.matrix.rotate(g_legRightAngle, -1, 0, 0);
+	rightLeg.matrix.rotate(0, -1, 0, 0);
 	rightLeg.matrix.translate(0.03, -0.65, 0.0);
 	rightLeg.matrix.scale(0.15, 0.5, 0.325);
 	rightLeg.render();
