@@ -6,11 +6,22 @@
   </head>
 
   <body onload="main()">
-    <canvas id="webgl" width="400" height="400">
+    <h3>Minecraft-esque Scavenger Hunt</h3>
+    <canvas id="webgl" width="1000" height="1000">
     Please use a browser that supports "canvas"
     </canvas>
 
     <p id="indicator">MS: _  //  FPS: _</p>
+    <p>
+      Instructions: 
+      <ul>
+        <li>You are in a maze, surrounded by walls of lava.</li>
+        <li>There are three different "biomes" represented by sand, stone, and wood, respectively.</li>
+        <li>Each biome has one stash of <i>diamond ore</i> and one stash of <i>TNT</i>.</li>
+        <li>Try to see if you can find all <b>six</b> stashes!</li>
+        <li>Bonus: observe the sky transition from day to night as you travel through the maze!</li>
+      </ul>
+    </p>
     <style>
       table, td, th {
         border: 1px solid;

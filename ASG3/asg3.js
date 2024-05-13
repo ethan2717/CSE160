@@ -322,8 +322,9 @@ function renderAllShapes() {
   // 5 wood
 
   const ground = new Cube();
-  ground.textureNum = 1; // lava
-  ground.matrix.translate(0, -0.75, 0);
+  // ground.textureNum = 1; // lava
+  ground.color = [0.05, 0.65, 0.08, 1];
+  ground.matrix.translate(0, -0.1, 0);
   ground.matrix.scale(200, -0.1, 200);
   ground.matrix.translate(-0.5, 0, -0.5);
   ground.render();
@@ -333,7 +334,7 @@ function renderAllShapes() {
   sky.matrix.scale(200, 200, 200);
   sky.matrix.translate(-0.5, -0.1, -0.5);
   sky.render();
-  
+
   drawMap();
 
   const duration = performance.now() - start;
@@ -348,59 +349,88 @@ function renderAllShapes() {
 
 function drawMap() {
   const map1 = [
-    [6, 6, 6, 5, 6, 6, 6, 3],
-    [0, 5, 6, 5, 4, 3, 6, 3],
-    [5, 5, 6, 5, 3, 3, 6, 3],
-    [5, 6, 6, 6, 6, 6, 6, 3],
-    [5, 6, 2, 6, 2, 2, 2, 2],
-    [5, 6, 2, 6, 4, 2, 0, 2],
-    [5, 6, 2, 2, 2, 2, 6, 2],
-    [5, 6, 6, 6, 6, 6, 6, 2],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 5, 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 3,  ,  , 5, 5, 5, 1],
+    [1, 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 3,  ,  ,  ,  , 0, 1],
+    [1, 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 3,  ,  ,  , 0, 5, 1],
+    [1, 5,  ,  , 5,  ,  , 5, 5, 5, 5, 5, 5, 5, 5,  ,  ,  , 3, 3, 3, 3,  ,  ,  , 3,  ,  ,  ,  , 0, 1],
+    [1, 5,  ,  , 5,  ,  , 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  , 3,  ,  , 5, 5, 5, 1],
+    [1, 5,  ,  , 5,  ,  , 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  , 3,  ,  , 5,  ,  , 1],
+    [1, 5,  ,  , 5,  ,  , 5,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  , 3,  ,  , 5,  ,  , 1],
+    [1, 5,  ,  , 5,  ,  , 5,  ,  ,  , 5, 5, 5, 5, 5, 3, 3, 3,  ,  ,  ,  ,  ,  , 3,  ,  , 5,  ,  , 1],
+    [1,  ,  ,  , 5,  ,  , 5,  ,  ,  , 5, 5, 5,  ,  ,  ,  ,  ,  ,  ,  , 3, 3, 3, 3,  ,  , 5,  ,  , 1],
+    [1,  ,  ,  , 5, 5, 5, 5,  ,  ,  ,  , 5, 5,  ,  ,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  , 5,  ,  , 1],
+    [1,  ,  , 5, 5,  ,  ,  ,  ,  ,  ,  ,  , 2,  ,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 1],
+    [1,  ,  , 5, 5,  ,  ,  ,  , 4,  ,  ,  ,  , 2,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 1],
+    [1,  ,  ,  , 5,  ,  ,  ,  , 4, 4,  ,  ,  ,  , 2,  ,  ,  ,  , 3,  ,  ,  , 5, 5, 5, 5,  ,  , 5, 1],
+    [1, 5,  ,  ,  , 5, 5,  ,  ,  ,  ,  ,  ,  ,  ,  , 2,  ,  ,  ,  , 3,  ,  , 5,  ,  ,  ,  ,  ,  , 1],
+    [1, 5, 5,  ,  ,  , 5,  ,  ,  ,  ,  ,  ,  ,  ,  , 2,  ,  ,  ,  ,  , 3,  , 5,  ,  ,  ,  ,  ,  , 1],
+    [1, 5, 5, 5,  ,  ,  , 5, 5, 5, 5, 5, 5, 5,  ,  , 2, 2,  ,  ,  ,  ,  , 3, 5,  ,  ,  , 2, 4,  , 1],
+    [1,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 2, 2, 2,  ,  ,  ,  ,  ,  ,  ,  ,  , 4, 2,  , 1],
+    [1,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 2, 2, 2, 2,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 1],
+    [1,  ,  ,  ,  ,  ,  , 3, 3, 3,  ,  ,  ,  ,  ,  , 2, 2, 2, 2, 2,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 1],
+    [1,  ,  , 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2,  ,  ,  , 2, 2, 2, 2, 2, 2, 1],
+    [1,  ,  ,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 2, 2,  ,  ,  , 2,  , 0,  ,  ,  , 1],
+    [1, 3,  ,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 2,  ,  ,  , 2, 0, 0,  ,  ,  , 1],
+    [1, 3, 3,  ,  ,  ,  ,  , 3,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 2,  ,  ,  , 2, 2, 2, 2,  ,  , 1],
+    [1, 3, 3, 3, 3,  ,  , 3, 3, 3,  ,  , 3, 3, 3,  ,  , 2,  ,  ,  , 2,  ,  ,  ,  ,  ,  ,  ,  ,  , 1],
+    [1, 4,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 3, 3,  ,  ,  , 2,  ,  ,  , 2,  ,  ,  ,  ,  ,  ,  ,  ,  , 1],
+    [1, 4,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 3,  ,  ,  , 2, 2,  ,  ,  , 2,  ,  ,  ,  ,  ,  ,  ,  ,  , 1],
+    [1, 3,  ,  , 3, 3, 3, 3, 3, 3, 3, 3, 3,  ,  ,  , 2, 2,  ,  ,  , 2,  ,  ,  , 2, 2,  ,  ,  ,  , 1],
+    [1, 3,  ,  , 3, 0,  ,  ,  ,  ,  ,  , 3, 3,  ,  ,  , 2,  ,  ,  , 2,  ,  ,  , 2, 2,  ,  ,  ,  , 1],
+    [1, 3,  ,  , 3, 0,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 2,  ,  ,  ,  ,  ,  ,  , 2, 2,  ,  ,  , 2, 1],
+    [1, 3,  ,  , 3, 0,  ,  ,  ,  ,  ,  ,  ,  ,  ,  ,  , 2,  ,  ,  ,  ,  ,  ,  , 2, 2,  ,  , 2, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ];
   const block = new Cube();
-  block.matrix.translate(0, 2, 0);
   block.matrix.scale(3, 3, 3);
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      switch (map1[r][c]) {
-        case 0:
-          block.textureNum = 0;
-          block.matrix.setTranslate(0, 0, 0);
-          block.matrix.translate(r, 0, c);
-          block.render();
-          break;
-        case 1:
-          block.textureNum = 1;
-          block.matrix.setTranslate(0, 0, 0);
-          block.matrix.translate(r, 0, c);
-          block.render();
-          break;
-        case 2:
-          block.textureNum = 2;
-          block.matrix.setTranslate(0, 0, 0);
-          block.matrix.translate(r, 0, c);
-          block.render();
-          break;
-        case 3:
-          block.textureNum = 3;
-          block.matrix.setTranslate(0, 0, 0);
-          block.matrix.translate(r, 0, c);
-          block.render();
-          break;
-        case 4:
-          block.textureNum = 4;
-          block.matrix.setTranslate(0, 0, 0);
-          block.matrix.translate(r, 0, c);
-          block.render();
-          break;
-        case 5:
-          block.textureNum = 5;
-          block.matrix.setTranslate(0, 0, 0);
-          block.matrix.translate(r, 0, c);
-          block.render();
-          break;
-        default:
-          continue;
+  for (let i = 0; i < 2; i++) {
+    block.matrix.translate(0, i, 0);
+    for (let r = 0; r < map1.length; r++) {
+      for (let c = 0; c < map1[r].length; c++) {
+        switch (map1[r][c]) {
+          case 0:
+            block.textureNum = 0;
+            block.matrix.setTranslate(0, 0, 0);
+            block.matrix.translate(r, i, c);
+            block.render();
+            break;
+          case 1:
+            block.textureNum = 1;
+            block.matrix.setTranslate(0, 0, 0);
+            block.matrix.translate(r, i, c);
+            block.render();
+            block.matrix.setTranslate(0, 0, 0);
+            block.matrix.translate(r, i*2, c);
+            block.render();
+            break;
+          case 2:
+            block.textureNum = 2;
+            block.matrix.setTranslate(0, 0, 0);
+            block.matrix.translate(r, i, c);
+            block.render();
+            break;
+          case 3:
+            block.textureNum = 3;
+            block.matrix.setTranslate(0, 0, 0);
+            block.matrix.translate(r, i, c);
+            block.render();
+            break;
+          case 4:
+            block.textureNum = 4;
+            block.matrix.setTranslate(0, 0, 0);
+            block.matrix.translate(r, i, c);
+            block.render();
+            break;
+          case 5:
+            block.textureNum = 5;
+            block.matrix.setTranslate(0, 0, 0);
+            block.matrix.translate(r, i, c);
+            block.render();
+            break;
+          default:
+            continue;
+        }
       }
     }
   }
