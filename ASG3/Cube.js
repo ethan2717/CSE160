@@ -25,12 +25,12 @@ class Cube {
     }
 
     createUVMatrix() {
-        const frontUV = [0,0, 1,1, 1,0,  0,0, 0,1, 1,1];
-        const backUV = [0,0, 1,1, 1,0,  0,0, 0,1, 1,1];
-        const topUV = [0,0, 0,1, 1,1,  0,0, 1,1, 1,0];
-        const bottomUV = [0,0, 0,1, 1,1,  0,0, 1,1, 1,0];
-        const leftUV = [1,0, 1,1, 0,0,  0,0, 0,1, 1,1];
-        const rightUV = [1,0, 1,1, 0,0,  0,0, 0,1, 1,1];
+        const frontUV = [0,0, 1,1, 1,0,  0,0, 0,1, 1,1]; // correct
+        const backUV = [0,0, 1,1, 1,0,  0,1, 0,0, 1,1]; // correct
+        const topUV = [0,0, 0,1, 1,1,  0,0, 1,1, 1,0]; // correct
+        const bottomUV = [1,1, 0,1, 0,0,  0,0, 1,1, 1,0]; // correct
+        const leftUV = [1,0, 1,1, 0,0,  0,1, 0,0, 1,1]; // correct
+        const rightUV = [1,0, 1,1, 0,0,  0,1, 0,0, 1,1]; // correct
         return frontUV.concat(backUV).concat(topUV.concat(bottomUV)).concat(leftUV.concat(rightUV));
     }
 

@@ -180,50 +180,12 @@ let g_vertAngle = 0;
 let g_start = performance.now() / 1000;
 let g_seconds = 0;
 
-/* function addActionsForHtmlUI() {
-  document.getElementById('horzSlide').addEventListener('mousemove', function() {
-    g_horzAngle = this.value;
-    renderAllShapes();
-  });
-  document.getElementById('vertSlide').addEventListener('mousemove', function() {
-    g_vertAngle = this.value;
-    renderAllShapes();
-  });
-
-  document.getElementById('armLeftSlide').addEventListener('mousemove', function() {
-    g_armLeftAngle = this.value;
-    renderAllShapes();
-  });
-  document.getElementById('armRightSlide').addEventListener('mousemove', function() {
-    g_armRightAngle = this.value;
-    renderAllShapes();
-  });
-
-  document.getElementById('legLeftSlide').addEventListener('mousemove', function() {
-    g_legLeftAngle = this.value;
-    renderAllShapes();
-  });
-  document.getElementById('legRightSlide').addEventListener('mousemove', function() {
-    g_legRightAngle = this.value;
-    renderAllShapes();
-  });
-
-  document.getElementById('animation').onclick = function() {
-    g_animation = !g_animation;
-  };
-  document.getElementById('reset').onclick = function() {
-    g_reset = true;
-  };
-} */
-
 // ### MAIN ############
 function main() {
 
   setupWebGL();
 
   connectVariablesToGLSL();
-
-  // addActionsForHtmlUI();
 
   initTextures();
 
@@ -287,10 +249,10 @@ function initTextures() {
   // Tell the browser to load an image
   image0.src = './diamond.png';
   image1.src = './lava.jpg';
-  image2.src = './stone.png';
-  image3.src = './tnt.png';
-  image4.src = './wood.jpg';
-  image5.src = './sand.jpg';
+  image2.src = './sand.jpg';
+  image3.src = './stone.png';
+  image4.src = './tnt.png';
+  image5.src = './wood.jpg';
 
   return true;
 }
@@ -352,9 +314,15 @@ function renderAllShapes() {
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+  // 0 diamond
+  // 1 lava
+  // 2 sand
+  // 3 stone
+  // 4 tnt
+  // 5 wood
+
   const ground = new Cube();
   ground.textureNum = 1; // lava
-  // ground.color = [0.05, 0.65, 0.08, 1];
   ground.matrix.translate(0, -0.75, 0);
   ground.matrix.scale(200, -0.1, 200);
   ground.matrix.translate(-0.5, 0, -0.5);
@@ -365,52 +333,8 @@ function renderAllShapes() {
   sky.matrix.scale(200, 200, 200);
   sky.matrix.translate(-0.5, -0.1, -0.5);
   sky.render();
-
-  const test = new Cube();
-  test.textureNum = 2; // stone
-  test.matrix.translate(-7, 7, -7);
-  test.matrix.scale(30, 1, 30);
-  test.render();
-
-	// body
-	/* const body = new Cube();
-	body.textureNum = 0;
-	body.matrix.rotate(0, 1, 1, 1);
-	body.matrix.translate(-0.25, -0.25, 0.0);
-	body.matrix.scale(0.5, 0.65, 0.3);
-	body.render();
-
-  // arms
-	const leftArm = new Cube();
-	leftArm.textureNum = 1;
-	leftArm.matrix.rotate(-180, 0, 0, 1);
-	leftArm.matrix.translate(0.25, -0.3, -0.025);
-	leftArm.matrix.rotate(0, 1, 0, 0);
-	leftArm.matrix.scale(0.125, 0.45, 0.35);
-	leftArm.render();
-
-	const rightArm = new Cube();
-	rightArm.textureNum = 1;
-	rightArm.matrix.rotate(-180, 0, 0, 1);
-	rightArm.matrix.translate(-0.375, -0.3, -0.025);
-	rightArm.matrix.rotate(0, -1, 0, 0);
-	rightArm.matrix.scale(0.125, 0.45, 0.35);
-	rightArm.render();
-
-	// legs
-	const leftLeg = new Cube();
-	leftLeg.color = [1, 1, 0, 1];
-	leftLeg.matrix.rotate(0, 1, 0, 0);
-	leftLeg.matrix.translate(-0.175, -0.65, 0.0);
-	leftLeg.matrix.scale(0.15, 0.5, 0.325);
-	leftLeg.render();
-
-	const rightLeg = new Cube();
-	rightLeg.color = [1, 1, 0, 1];
-	rightLeg.matrix.rotate(0, -1, 0, 0);
-	rightLeg.matrix.translate(0.03, -0.65, 0.0);
-	rightLeg.matrix.scale(0.15, 0.5, 0.325);
-	rightLeg.render(); */
+  
+  drawMap();
 
   const duration = performance.now() - start;
   const indicator = document.getElementById('indicator');
@@ -420,4 +344,64 @@ function renderAllShapes() {
   }
   indicator.innerHTML = `
     MS: ${Math.floor(duration)}  //  FPS: ${ Math.floor(10000 / duration) / 10}`;
+}
+
+function drawMap() {
+  const map1 = [
+    [6, 6, 6, 5, 6, 6, 6, 3],
+    [0, 5, 6, 5, 4, 3, 6, 3],
+    [5, 5, 6, 5, 3, 3, 6, 3],
+    [5, 6, 6, 6, 6, 6, 6, 3],
+    [5, 6, 2, 6, 2, 2, 2, 2],
+    [5, 6, 2, 6, 4, 2, 0, 2],
+    [5, 6, 2, 2, 2, 2, 6, 2],
+    [5, 6, 6, 6, 6, 6, 6, 2],
+  ];
+  const block = new Cube();
+  block.matrix.translate(0, 2, 0);
+  block.matrix.scale(3, 3, 3);
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      switch (map1[r][c]) {
+        case 0:
+          block.textureNum = 0;
+          block.matrix.setTranslate(0, 0, 0);
+          block.matrix.translate(r, 0, c);
+          block.render();
+          break;
+        case 1:
+          block.textureNum = 1;
+          block.matrix.setTranslate(0, 0, 0);
+          block.matrix.translate(r, 0, c);
+          block.render();
+          break;
+        case 2:
+          block.textureNum = 2;
+          block.matrix.setTranslate(0, 0, 0);
+          block.matrix.translate(r, 0, c);
+          block.render();
+          break;
+        case 3:
+          block.textureNum = 3;
+          block.matrix.setTranslate(0, 0, 0);
+          block.matrix.translate(r, 0, c);
+          block.render();
+          break;
+        case 4:
+          block.textureNum = 4;
+          block.matrix.setTranslate(0, 0, 0);
+          block.matrix.translate(r, 0, c);
+          block.render();
+          break;
+        case 5:
+          block.textureNum = 5;
+          block.matrix.setTranslate(0, 0, 0);
+          block.matrix.translate(r, 0, c);
+          block.render();
+          break;
+        default:
+          continue;
+      }
+    }
+  }
 }
