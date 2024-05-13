@@ -256,10 +256,10 @@ function keydown(ev) {
       g_camera.goRight();
       break;
     case 81: // Q
-      g_camera.turn(2);
+      g_camera.turnHorz(2);
       break;
     case 69: // E
-      g_camera.turn(-2);
+      g_camera.turnHorz(-2);
       break;
   }
 }
@@ -319,9 +319,8 @@ function sendImageToTEXTURE(actTex, image, sampler, num) {
 }
 
 function click(ev) {
-  if (ev.shiftKey) {
-    g_poke = !g_poke;
-  }
+  g_camera.turnHorz(ev.movementX / 3);
+  g_camera.turnVert(ev.movementY / 3);
 }
 
 function tick() {
@@ -338,7 +337,7 @@ function renderAllShapes() {
   projMat.setPerspective(50, canvas.width/canvas.height, 0.1, 100);
   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
-  const viewMat = new Matrix4();
+  const viewMat = new Matrix4().rotate(g_horzAngle, 0, 1, 0);
   const [eye1, eye2, eye3] = g_camera.eye.elements;
   const [at1, at2, at3] = g_camera.at.elements;
   const [up1, up2, up3] = g_camera.up.elements;
@@ -354,19 +353,27 @@ function renderAllShapes() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   const ground = new Cube();
-  ground.color = [0, 0.6, 0.1, 1];
-  ground.matrix.translate(-1, -0.6, -1);
-  ground.matrix.scale(2, -0.5, 0.1);
+  ground.textureNum = 1; // lava
+  // ground.color = [0.05, 0.65, 0.08, 1];
+  ground.matrix.translate(0, -0.75, 0);
+  ground.matrix.scale(200, -0.1, 200);
+  ground.matrix.translate(-0.5, 0, -0.5);
   ground.render();
 
   const sky = new Cube();
   sky.color = [0.4, 0.8, 1, 1];
-  sky.matrix.translate(-1, -0.5, -0.5);
-  sky.matrix.scale(3, 3, 3);
+  sky.matrix.scale(200, 200, 200);
+  sky.matrix.translate(-0.5, -0.1, -0.5);
   sky.render();
 
+  const test = new Cube();
+  test.textureNum = 2; // stone
+  test.matrix.translate(-7, 7, -7);
+  test.matrix.scale(30, 1, 30);
+  test.render();
+
 	// body
-	const body = new Cube();
+	/* const body = new Cube();
 	body.textureNum = 0;
 	body.matrix.rotate(0, 1, 1, 1);
 	body.matrix.translate(-0.25, -0.25, 0.0);
@@ -403,7 +410,7 @@ function renderAllShapes() {
 	rightLeg.matrix.rotate(0, -1, 0, 0);
 	rightLeg.matrix.translate(0.03, -0.65, 0.0);
 	rightLeg.matrix.scale(0.15, 0.5, 0.325);
-	rightLeg.render();
+	rightLeg.render(); */
 
   const duration = performance.now() - start;
   const indicator = document.getElementById('indicator');
