@@ -17,9 +17,9 @@ function main() {
     const fov = 45;
     const aspect = 2;
     const near = 0.1;
-    const far = 10;
+    const far = 100;
     camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(0, 2, 8);
+    camera.position.set(0, 10, 20);
 
     const controls = new OrbitControls(camera, canvas);
     controls.target.set(0, 2, 2);
@@ -36,11 +36,17 @@ function main() {
         makeInstance(cylGeometry, 0xaa8844,  2),
     ];
 
-    const color = 0xFFFFFF;
-    const intensity = 3;
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(-1, 2, 4);
-    scene.add(light);
+    // light yellow light
+    const ambLight = new THREE.AmbientLight(0xffff66, 0.5);
+    scene.add(ambLight);
+    
+    const dirLight = new THREE.DirectionalLight('white', 3);
+    dirLight.position.set(-1, 2, 4);
+    scene.add(dirLight);
+
+    const spotLight = new THREE.SpotLight('white', 10);
+    scene.add(spotLight);
+    scene.add(spotLight.target);
 
     const objLoader = new OBJLoader();
     const mtlLoader = new MTLLoader();
