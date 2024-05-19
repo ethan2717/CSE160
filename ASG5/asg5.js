@@ -8,6 +8,7 @@ let renderer;
 let camera;
 let scene;
 let cubes;
+let sky;
 
 main();
 function main() {
@@ -35,6 +36,11 @@ function main() {
         makeInstance(sphGeometry, 0x8844aa, -2),
         makeInstance(cylGeometry, 0xaa8844,  2),
     ];
+
+    const SKY_PATH = './sunset.jpg';
+    const skyLoader = new THREE.CubeTextureLoader();
+    sky = skyLoader.load([SKY_PATH, SKY_PATH, SKY_PATH, SKY_PATH, SKY_PATH, SKY_PATH]);
+    scene.background = sky;
 
     // light yellow light
     const ambLight = new THREE.AmbientLight(0xffff66, 0.5);
@@ -78,6 +84,8 @@ function render(time) {
         cube.rotation.x = rot;
         cube.rotation.y = rot;
     });
+
+    scene.background = sky;
     renderer.render(scene, camera);
     requestAnimationFrame(render);
 }
