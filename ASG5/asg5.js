@@ -55,7 +55,15 @@ function main() {
         }
         map.push(row);
     }
-    console.log(map);
+    // console.log(findThreeInARow(map));
+    document.getElementById('submit').addEventListener('click', checkAnswer);
+    function checkAnswer() {
+        if (document.getElementById('guess').value == findThreeInARow(map).length) {
+            alert('Correct!');
+        } else {
+            alert('Try again.');
+        }
+    }
 
     const SKY_PATH = './sunset.jpg';
     const skyLoader = new THREE.CubeTextureLoader();
@@ -121,4 +129,43 @@ function makeInstance(geometry, color, x, y) {
     shape.position.x = x;
     shape.position.y = y;
     return shape;
+}
+
+function findThreeInARow(grid) {
+    const directions = [
+        { x: 0, y: 1 },  // right
+        { x: 1, y: 0 },  // down
+        { x: 1, y: 1 },  // down-right
+        { x: 1, y: -1 }  // down-left
+    ];
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const results = [];
+
+    function checkDirection(x, y, dir) {
+        const startVal = grid[x][y];
+        for (let step = 1; step < 3; step++) {
+            const newX = x + dir.x * step;
+            const newY = y + dir.y * step;
+            if (newX < 0 || newX >= rows || newY < 0 || newY >= cols || grid[newX][newY] !== startVal) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    for (let x = 0; x < rows; x++) {
+        for (let y = 0; y < cols; y++) {
+            for (const dir of directions) {
+                if (checkDirection(x, y, dir)) {
+                   results.push({
+                    start: { x, y },
+                    direction: dir,
+                    value: grid[x][y]
+                   });
+                }
+            }
+        }
+    }
+    return results;
 }
