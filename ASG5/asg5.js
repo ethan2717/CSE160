@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import {OBJLoader} from 'https://threejs.org/examples/jsm/loaders/OBJLoader.js';
 import {MTLLoader} from 'https://threejs.org/examples/jsm/loaders/MTLLoader.js';
+import {OrbitControls} from 'https://threejs.org/examples/jsm/controls/OrbitControls.js';
 
+let canvas;
 let renderer;
 let camera;
 let scene;
@@ -9,7 +11,7 @@ let cubes;
 
 main();
 function main() {
-    const canvas = document.querySelector('#c');
+    canvas = document.querySelector('#c');
     renderer = new THREE.WebGLRenderer({antialias: true, canvas});
 
     const fov = 45;
@@ -18,6 +20,10 @@ function main() {
     const far = 10;
     camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     camera.position.set(0, 2, 8);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.target.set(0, 2, 2);
+    controls.update();
 
     scene = new THREE.Scene();
     const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -51,6 +57,15 @@ function main() {
 requestAnimationFrame(render);
 function render(time) {
     time *= 0.001;
+
+    if (canvas.height != window.innerHeight || canvas.width != window.innerWidth) {
+        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+        camera.aspect = canvas.width / canvas.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvas.width, canvas.height);
+    }
+
     cubes.forEach((cube, ndx) => {
         const speed = 1 + ndx * .1;
         const rot = time * speed;
