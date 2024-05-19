@@ -31,11 +31,31 @@ function main() {
     const sphGeometry = new THREE.SphereGeometry(0.5, 32, 32);
     const cylGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
 
-    cubes = [
-        makeInstance(cubeGeometry, 0x44aa88, 0),
-        makeInstance(sphGeometry, 0x8844aa, -2),
-        makeInstance(cylGeometry, 0xaa8844,  2),
-    ];
+    const map = [];
+    cubes = [];
+    for (let r = 0; r < 8; r += 2) {
+        const row = [];
+        for (let c = 0; c < 10; c += 2) {
+            let rand = Math.floor(Math.random() * 3) + 1;
+            row.push(rand);
+            let shape;
+            switch (rand) {
+                case 1:
+                    shape = cubeGeometry;
+                    break;
+                case 2:
+                    shape = sphGeometry;
+                    break;
+                case 3:
+                    shape = cylGeometry;
+                    break;
+            }
+            const color = new THREE.Color(Math.random(), Math.random(), Math.random());
+            cubes.push(makeInstance(shape, color, c - 4, r + 2.5));
+        }
+        map.push(row);
+    }
+    console.log(map);
 
     const SKY_PATH = './sunset.jpg';
     const skyLoader = new THREE.CubeTextureLoader();
@@ -90,7 +110,7 @@ function render(time) {
     requestAnimationFrame(render);
 }
 
-function makeInstance(geometry, color, x) {
+function makeInstance(geometry, color, x, y) {
     const loader = new THREE.TextureLoader();
     const texture = loader.load('wall.jpg');
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -99,6 +119,6 @@ function makeInstance(geometry, color, x) {
     const shape = new THREE.Mesh(geometry, material);
     scene.add(shape);
     shape.position.x = x;
-    shape.position.y = 4;
+    shape.position.y = y;
     return shape;
 }
