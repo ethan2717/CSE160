@@ -31,8 +31,15 @@ uniform vec3 u_cameraPos;
 varying vec4 v_VertPos;
 uniform bool u_lightOn;
 uniform vec3 u_lightColor;
+uniform int u_whichTexture;
 void main() {
-  gl_FragColor = u_FragColor;
+  if (u_whichTexture == -1) {
+    gl_FragColor = vec4((v_Normal + 1.0) / 2.0, 1.0);
+  } else if (u_whichTexture == 0) {
+    gl_FragColor = u_FragColor;
+  } else {
+    gl_FragColor = vec4(1, 0, 0, 1);
+  }
 
   vec3 lightVector = u_lightPos - vec3(v_VertPos);
   float r = length(lightVector);
@@ -68,11 +75,12 @@ let u_GlobalRotateMatrix;
 let a_UV;
 let a_Normal;
 let u_lightPos;
-let u_lightOn = true;
+let u_lightOn;
 let u_cameraPos;
 let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_lightColor;
+let u_whichTexture;
 
 function main() {
 
@@ -192,6 +200,12 @@ function connectVariablesToGLSL() {
 		return;
 	}
 
+  u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+	if (!u_whichTexture) {
+		console.log('Failed to get the storage location of u_whichTexture');
+		return;
+	}
+
   const identityMat = new Matrix4();
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityMat.elements);
 }
@@ -215,7 +229,7 @@ let g_start = performance.now() / 1000;
 let g_seconds = 0;
 let g_normalOn = false; 
 let g_lightPos = [0, 1, -2];
-let g_lightOn = false;
+let g_lightOn = true;
 let g_lightColor = [0, 0, 0];
 let g_lightRotate = true;
 
@@ -259,7 +273,7 @@ function addActionsForHtmlUI() {
 
 function tick() {
   g_seconds = performance.now() / 1000 - g_start;
-  console.log(g_seconds);
+  // console.log(g_seconds);
   updateAnimationAngles();
   renderAllShapes();
   requestAnimationFrame(tick);
@@ -309,6 +323,8 @@ function renderAllShapes() {
   room.color [0.8, 0.8, 0.8, 1.0];
   room.matrix.scale(-7, -5, -10);
   room.matrix.translate(-0.5, -0.85, -0.5);
+  room.whichTexture = 0;
+  if (g_normalOn) room.whichTexture = -1;
   room.render();
 
   const light = new Cube();
@@ -321,6 +337,8 @@ function renderAllShapes() {
 
   const sphere = new Sphere(10, [1, 0, 0, 0]);
   sphere.matrix.translate(1.75, 0.5, 2);
+  sphere.whichTexture = 0;
+  if (g_normalOn) sphere.whichTexture = -1;
   sphere.render();
 	
 	// head
@@ -330,6 +348,7 @@ function renderAllShapes() {
 	head.matrix.rotate(g_headHorzAngle, 0, 1, 0);
 	head.matrix.rotate(g_headVertAngle, 1, 0, 0);
 	head.matrix.scale(0.45, 0.35, 0.4);
+  if (g_normalOn) head.whichTexture = -1;
 	head.render();
 
 	// left ear
@@ -339,6 +358,7 @@ function renderAllShapes() {
 	leftEar.matrix.rotate(-g_earLeftAngle, 0, 1, 0);
 	leftEar.matrix.translate(-0.05, 0.8, 0.0);
 	leftEar.matrix.scale(0.2, 0.4, 0.2);
+  if (g_normalOn) leftEar.whichTexture = -1;
 	leftEar.render();
 
 	const leftInEar = new Cube();
@@ -346,6 +366,7 @@ function renderAllShapes() {
 	leftInEar.color = pink;
 	leftInEar.matrix.translate(0.2, 0.0, -0.3);
 	leftInEar.matrix.scale(0.6, 0.7, 0.3);
+  if (g_normalOn) leftInEar.whichTexture = -1;
 	leftInEar.render();
 
 	// right ear
@@ -355,6 +376,7 @@ function renderAllShapes() {
 	rightEar.matrix.translate(0.85, 0.8, 0.0);
 	rightEar.matrix.rotate(g_earRightAngle, 0, -1, 0);
 	rightEar.matrix.scale(0.2, 0.4, 0.2);
+  if (g_normalOn) rightEar.whichTexture = -1;
 	rightEar.render();
 
 	const rightInEar = new Cube();
@@ -362,6 +384,7 @@ function renderAllShapes() {
 	rightInEar.color = pink;
 	rightInEar.matrix.translate(0.2, 0.0, -0.3);
 	rightInEar.matrix.scale(0.6, 0.7, 0.3);
+  if (g_normalOn) rightInEar.whichTexture = -1;
 	rightInEar.render();
 
 	// face
@@ -370,6 +393,7 @@ function renderAllShapes() {
 	leftEye.color = black;
 	leftEye.matrix.translate(0.3, 0.55, 0.01);
 	leftEye.matrix.scale(0.05, 0.1, -0.02);
+  if (g_normalOn) leftEye.whichTexture = -1;
 	leftEye.render();
 
 	const rightEye = new Cube();
@@ -377,6 +401,7 @@ function renderAllShapes() {
 	rightEye.color = black;
 	rightEye.matrix.translate(0.65, 0.55, 0.01);
 	rightEye.matrix.scale(0.05, 0.1, -0.02);
+  if (g_normalOn) rightEye.whichTexture = -1;
 	rightEye.render();
 
 	const mouth = new Cube();
@@ -384,6 +409,7 @@ function renderAllShapes() {
 	mouth.color = black;
 	mouth.matrix.translate(0.35, 0.2, -0.01);
 	mouth.matrix.scale(0.3, 0.1, 0.01);
+  if (g_normalOn) mouth.whichTexture = -1;
 	mouth.render();
 
   const lip = new Cube();
@@ -391,6 +417,7 @@ function renderAllShapes() {
 	lip.color = lightPink;
 	lip.matrix.translate(0.175, 0.6, -0.01);
 	lip.matrix.scale(0.65, 0.45, 0.01);
+  if (g_normalOn) lip.whichTexture = -1;
 	lip.render();
 
 	const nose = new Cube();
@@ -398,6 +425,7 @@ function renderAllShapes() {
 	nose.color = darkPink;
 	nose.matrix.translate(0.425, 0.35, -0.01);
 	nose.matrix.scale(0.15, 0.15, -0.05);
+  if (g_normalOn) nose.whichTexture = -1;
 	nose.render();
 
 	// body
@@ -406,6 +434,7 @@ function renderAllShapes() {
 	body.matrix.rotate(0, 1, 1, 1);
 	body.matrix.translate(-0.25, -0.25, 0.0);
 	body.matrix.scale(0.5, 0.65, 0.3);
+  if (g_normalOn) body.whichTexture = -1;
 	body.render();
 
   // arms
@@ -415,6 +444,7 @@ function renderAllShapes() {
 	leftArm.matrix.translate(0.25, -0.3, -0.025);
 	leftArm.matrix.rotate(g_armLeftAngle, 1, 0, 0);
 	leftArm.matrix.scale(0.125, 0.45, 0.35);
+  if (g_normalOn) leftArm.whichTexture = -1;
 	leftArm.render();
 
 	const rightArm = new Cube();
@@ -423,6 +453,7 @@ function renderAllShapes() {
 	rightArm.matrix.translate(-0.375, -0.3, -0.025);
 	rightArm.matrix.rotate(g_armRightAngle, -1, 0, 0);
 	rightArm.matrix.scale(0.125, 0.45, 0.35);
+  if (g_normalOn) rightArm.whichTexture = -1;
 	rightArm.render();
 
 	// legs
@@ -431,6 +462,7 @@ function renderAllShapes() {
 	leftLeg.matrix.rotate(g_legLeftAngle, 1, 0, 0);
 	leftLeg.matrix.translate(-0.175, -0.65, 0.0);
 	leftLeg.matrix.scale(0.15, 0.5, 0.325);
+  if (g_normalOn) leftLeg.whichTexture = -1;
 	leftLeg.render();
 
 	const rightLeg = new Cube();
@@ -438,6 +470,7 @@ function renderAllShapes() {
 	rightLeg.matrix.rotate(g_legRightAngle, -1, 0, 0);
 	rightLeg.matrix.translate(0.03, -0.65, 0.0);
 	rightLeg.matrix.scale(0.15, 0.5, 0.325);
+  if (g_normalOn) rightLeg.whichTexture = -1;
 	rightLeg.render();
 
   const duration = performance.now() - start;
