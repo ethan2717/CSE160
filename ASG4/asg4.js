@@ -1,20 +1,62 @@
 // ColoredPoint.js (c) 2012 matsuda
 // Vertex shader program
 const VSHADER_SOURCE = `
-  attribute vec4 a_Position;
-  uniform mat4 u_ModelMatrix;
-  uniform mat4 u_GlobalRotateMatrix;
-  void main() {
-    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
-  }`;
+precision mediump float;
+attribute vec4 a_Position;
+attribute vec2 a_UV;
+attribute vec3 a_Normal;
+varying vec2 v_UV;
+varying vec3 v_Normal;
+varying vec4 v_VertPos;
+uniform mat4 u_ModelMatrix;
+uniform mat4 u_NormalMatrix; 
+uniform mat4 u_GlobalRotateMatrix;
+uniform mat4 u_ViewMatrix;
+uniform mat4 u_ProjectionMatrix;
+void main() {
+  gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
+  v_UV = a_UV;
+  v_Normal = a_Normal;
+  v_VertPos = u_ModelMatrix * a_Position;
+}`;
 
 // Fragment shader program
 const FSHADER_SOURCE = `
-  precision mediump float;
-  uniform vec4 u_FragColor;
-  void main() {
-    gl_FragColor = u_FragColor;
-  }`;
+precision mediump float;
+varying vec2 v_UV;
+varying vec3 v_Normal;
+uniform vec4 u_FragColor;
+uniform vec3 u_lightPos;
+uniform vec3 u_cameraPos;
+varying vec4 v_VertPos;
+uniform bool u_lightOn;
+uniform vec3 u_lightColor;
+void main() {
+  gl_FragColor = u_FragColor;
+
+  vec3 lightVector = u_lightPos - vec3(v_VertPos);
+  float r = length(lightVector);
+
+  // N dot L
+  vec3 L = normalize(lightVector);
+  vec3 N = normalize(v_Normal);
+  float nDotL = max(dot(N, L), 0.0);
+
+  // Reflection
+  vec3 R = reflect(-L, N);
+
+  // eye
+  vec3 E = normalize(u_cameraPos - vec3(v_VertPos));
+
+  // Specular
+  float specular = pow(max(dot(E, R), 0.0), 64.0);
+
+  vec3 diffuse = vec3(1.0, 1.0, 0.9) * vec3(gl_FragColor) * nDotL * 0.8;
+  vec3 ambient = (vec3(gl_FragColor) + u_lightColor) * 0.4;
+  if (u_lightOn) {
+      gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
+  }
+}`;
 
 // Global variables
 let canvas;
@@ -23,6 +65,14 @@ let a_Position;
 let u_FragColor;
 let u_ModelMatrix;
 let u_GlobalRotateMatrix;
+let a_UV;
+let a_Normal;
+let u_lightPos;
+let u_lightOn = true;
+let u_cameraPos;
+let u_ProjectionMatrix;
+let u_ViewMatrix;
+let u_lightColor;
 
 function main() {
 
@@ -34,13 +84,6 @@ function main() {
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-  canvas.onmousedown = click;
-  canvas.onmousemove = function(ev) {
-    if (ev.buttons == 1) {
-      click(ev);
-    }
-  };
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -83,6 +126,48 @@ function connectVariablesToGLSL() {
     return;
   }
 
+  // Get the storage location of a_UV
+  a_UV = gl.getAttribLocation(gl.program, 'a_UV');
+  if (a_UV < 0) {
+      console.log('Failed to get the storage location of a_UV');
+      return;
+  }
+
+// Get the storage location of a_Normal
+  a_Normal = gl.getAttribLocation(gl.program, 'a_Normal');
+  if (a_Normal < 0) {
+      console.log('Failed to get the storage location of a_Normal');
+      return;
+  }
+
+  // Get the storage location of u_lightColor
+	u_lightColor = gl.getUniformLocation(gl.program, 'u_lightColor');
+	if (!u_lightColor) {
+		console.log('Failed to get the storage location of u_lightColor');
+		return;
+	}
+
+	// Get the storage location of u_lightPos
+	u_lightPos = gl.getUniformLocation(gl.program, 'u_lightPos');
+	if (!u_lightPos) {
+		console.log('Failed to get the storage location of u_lightPos');
+		return;
+	}
+
+	// Get the storage location of u_lightPos
+	u_lightOn = gl.getUniformLocation(gl.program, 'u_lightOn');
+	if (!u_lightOn) {
+		console.log('Failed to get the storage location of u_lightOn');
+		return;
+	}
+
+	// Get the storage location of u_cameraPos
+	u_cameraPos = gl.getUniformLocation(gl.program, 'u_cameraPos');
+	if (!u_cameraPos) {
+		console.log('Failed to get the storage location of u_cameraPos');
+		return;
+	}
+
   u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
   if (!u_ModelMatrix) {
     console.log('Failed to get the storage location of u_ModelMatrix');
@@ -95,11 +180,25 @@ function connectVariablesToGLSL() {
     return;
   }
 
+  u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
+	if (!u_ViewMatrix) {
+		console.log('Failed to get the storage location of u_ViewMatrix');
+		return;
+	}
+
+	u_ProjectionMatrix = gl.getUniformLocation(gl.program, 'u_ProjectionMatrix');
+	if (!u_ProjectionMatrix) {
+		console.log('Failed to get the storage location of u_ProjectionMatrix');
+		return;
+	}
+
   const identityMat = new Matrix4();
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityMat.elements);
 }
 
 // More global variables
+const g_camera = new Camera();
+let g_cameraAngles = [0, 0, 0];
 let g_horzAngle = 0;
 let g_vertAngle = 0;
 let g_earLeftAngle = 0;
@@ -112,70 +211,50 @@ let g_legLeftAngle = 0;
 let g_legRightAngle = 0;
 
 // Animation-related global variables
-let g_poke = false;
-let g_animation = false;
-let g_reset = false;
 let g_start = performance.now() / 1000;
 let g_seconds = 0;
+let g_normalOn = false; 
+let g_lightPos = [0, 1, -2];
+let g_lightOn = false;
+let g_lightColor = [0, 0, 0];
+let g_lightRotate = true;
 
 function addActionsForHtmlUI() {
-  document.getElementById('horzSlide').addEventListener('mousemove', function() {
-    g_horzAngle = this.value;
+  document.getElementById('lightX').addEventListener('mousemove', function() {
+    g_lightPos[0] = this.value / 100;
     renderAllShapes();
   });
-  document.getElementById('vertSlide').addEventListener('mousemove', function() {
-    g_vertAngle = this.value;
+  document.getElementById('lightY').addEventListener('mousemove', function() {
+    g_lightPos[1] = this.value / 100;
     renderAllShapes();
   });
-
-  document.getElementById('earLeftSlide').addEventListener('mousemove', function() {
-    g_earLeftAngle = this.value;
-    renderAllShapes();
-  });
-  document.getElementById('earRightSlide').addEventListener('mousemove', function() {
-    g_earRightAngle = this.value;
+  document.getElementById('lightZ').addEventListener('mousemove', function() {
+    g_lightPos[2] = this.value / 100;
     renderAllShapes();
   });
 
-  document.getElementById('headHorzSlide').addEventListener('mousemove', function() {
-    g_headHorzAngle = this.value;
+  document.getElementById('lightR').addEventListener('mousemove', function() {
+    g_lightColor[0] = this.value / 100;
     renderAllShapes();
   });
-  document.getElementById('headVertSlide').addEventListener('mousemove', function() {
-    g_headVertAngle = this.value;
+  document.getElementById('lightG').addEventListener('mousemove', function() {
+    g_lightColor[1] = this.value / 100;
     renderAllShapes();
   });
-
-  document.getElementById('armLeftSlide').addEventListener('mousemove', function() {
-    g_armLeftAngle = this.value;
-    renderAllShapes();
-  });
-  document.getElementById('armRightSlide').addEventListener('mousemove', function() {
-    g_armRightAngle = this.value;
+  document.getElementById('lightB').addEventListener('mousemove', function() {
+    g_lightColor[2] = this.value / 100;
     renderAllShapes();
   });
 
-  document.getElementById('legLeftSlide').addEventListener('mousemove', function() {
-    g_legLeftAngle = this.value;
-    renderAllShapes();
-  });
-  document.getElementById('legRightSlide').addEventListener('mousemove', function() {
-    g_legRightAngle = this.value;
-    renderAllShapes();
-  });
-
-  document.getElementById('animation').onclick = function() {
-    g_animation = !g_animation;
+  document.getElementById('normal').onclick = function() {
+    g_normalOn = !g_normalOn;
   };
-  document.getElementById('reset').onclick = function() {
-    g_reset = true;
+  document.getElementById('light').onclick = function() {
+    g_lightOn = !g_lightOn;
   };
-}
-
-function click(ev) {
-  if (ev.shiftKey) {
-    g_poke = !g_poke;
-  }
+  document.getElementById('rotate').onclick = function() {
+    g_lightRotate = !g_lightRotate;
+  };
 }
 
 function tick() {
@@ -187,54 +266,35 @@ function tick() {
 }
 
 function updateAnimationAngles() {
-  if (g_animation) {
-    g_earLeftAngle = animate(15);
-    g_earRightAngle = animate(15);
-    g_headHorzAngle = animate(10);
-    g_headVertAngle = animate(10);
-    g_armLeftAngle = animate(50);
-    g_armRightAngle = animate(50);
-    g_legLeftAngle = animate(40);
-    g_legRightAngle = animate(40);
+  if (g_lightRotate) {
+    g_lightPos[0] = 1.8 * Math.cos(g_seconds);
+    g_lightPos[2] = 1.8 * Math.sin(g_seconds);
   }
-  if (g_poke) {
-    g_earLeftAngle = animate(180);
-    g_earRightAngle = animate(180);
-    g_headHorzAngle = animate(180);
-    g_headVertAngle = animate(180);
-    g_armLeftAngle = animate(180);
-    g_armRightAngle = animate(180);
-    g_legLeftAngle = animate(180);
-    g_legRightAngle = animate(180);
-  }
-  if (g_reset) {
-    g_animation = false;
-    g_poke = false;
-    g_horzAngle = 0;
-    g_vertAngle = 0;
-    g_earLeftAngle = 0;
-    g_earRightAngle = 0;
-    g_headHorzAngle = 0;
-    g_headVertAngle = 0;
-    g_armLeftAngle = 0;
-    g_armRightAngle = 0;
-    g_legLeftAngle = 0;
-    g_legRightAngle = 0;
-    g_reset = false;
-  }
-}
-
-function animate(num) {
-  return num * Math.sin(g_seconds * 2);
 }
 
 function renderAllShapes() {
   const start = performance.now();
 
+  const projMat = new Matrix4();
+  projMat.setPerspective(45, canvas.width/canvas.height, 1, 100);
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
   let globalRotMat = new Matrix4().rotate(g_horzAngle, 0, 1, 0);
   globalRotMat = globalRotMat.rotate(g_vertAngle, 1, 0, 0);
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
+  const viewMat = new Matrix4().rotate(g_horzAngle, 0, 1, 0);
+  const [eye1, eye2, eye3] = g_camera.eye.elements;
+  const [at1, at2, at3] = g_camera.at.elements;
+  const [up1, up2, up3] = g_camera.up.elements;
+  viewMat.setLookAt(eye1, eye2, eye3, at1, at2, at3, up1, up2, up3);
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
+  gl.uniform3f(u_lightPos, g_lightPos[0], g_lightPos[1], g_lightPos[2]);
+	gl.uniform3f(u_cameraPos, eye1, eye2, eye3);
+	gl.uniform1i(u_lightOn, g_lightOn);
+	gl.uniform3f(u_lightColor, g_lightColor[0], g_lightColor[1], g_lightColor[2]);
+  
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -243,6 +303,25 @@ function renderAllShapes() {
 	const pink = [1.0, 0.6, 1.0, 1.0];
 	const darkPink = [0.9, 0.01, 0.6, 1.0];
   const black = [0.0, 0.0, 0.0, 1.0];
+
+  // room
+  const room = new Cube();
+  room.color [0.8, 0.8, 0.8, 1.0];
+  room.matrix.scale(-7, -5, -10);
+  room.matrix.translate(-0.5, -0.85, -0.5);
+  room.render();
+
+  const light = new Cube();
+  light.color = [1, 1, 0, 1];
+  const [x, y, z] = g_lightPos;
+  light.matrix.translate(x, y, z);
+  light.matrix.translate(0.5, 0.5, 0.5);
+  light.matrix.scale(-0.1, -0.1, -0.1);
+  light.render();
+
+  const sphere = new Sphere(10, [1, 0, 0, 0]);
+  sphere.matrix.translate(1.75, 0.5, 2);
+  sphere.render();
 	
 	// head
 	const head = new Cube();

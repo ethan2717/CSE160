@@ -6,50 +6,42 @@
   </head>
 
   <body onload="main()">
-    <h3>Inspiration: Piglet from Winnie-the-Pooh</h3>
-    <canvas id="webgl" width="400" height="400">
+    <h3>Lighting</h3>
+    <canvas id="webgl" width="500" height="500">
     Please use a browser that supports "canvas"
     </canvas>
 
     <p id="indicator">MS: _  //  FPS: _</p>
     <p>
-      Camera Angle:
-      (horizontal) <input type="range" min="-180" max="180" value="0" class="slider" id="horzSlide">
-      (vertical) <input type="range" min="-180" max="180" value="0" class="slider" id="vertSlide">
+      Light:
+      <button type="button" id="light">ON / OFF</button>
+      <br>
+      Location:
+      x <input type="range", min="-300" max="300" value="0" class="slider" id="lightX">
+      y <input type="range", min="-300" max="300" value="100" class="slider" id="lightY">
+      z <input type="range", min="-350" max="350" value="-150" class="slider" id="lightZ">
+      <br>
+      Color:
+      r <input type="range", min="0" max="100" value="0" class="slider" id="lightR">
+      g <input type="range", min="0" max="100" value="0" class="slider" id="lightG">
+      b <input type="range", min="0" max="100" value="0" class="slider" id="lightB">
     </p>
     <p>
-      Body Parts:
-      <br>
-      Ears:
-      (left) <input type="range", min="-35" max="20" value="0" class="slider" id="earLeftSlide">
-      (right) <input type="range", min="-20" max="20" value="0" class="slider" id="earRightSlide">
-      <br>
-      Head:
-      (side to side) <input type="range", min="-30" max="10" value="0" class="slider" id="headHorzSlide">
-      (up and down) <input type="range", min="-30" max="10" value="0" class="slider" id="headVertSlide">
-      <br>
-      Arms:
-      (left) <input type="range", min="-60" max="90" value="0" class="slider" id="armLeftSlide">
-      (right) <input type="range", min="-60" max="90" value="0" class="slider" id="armRightSlide">
-      <br>
-      Legs:
-      (left) <input type="range", min="-30" max="90" value="0" class="slider" id="legLeftSlide">
-      (right) <input type="range", min="-30" max="90" value="0" class="slider" id="legRightSlide">
+      Normal Light:
+      <button type="button" id="normal">ON / OFF</button>
     </p>
     <p>
-      Animation:
-      <button type="button" id="animation">Play / Pause</button>
-    </p>
-    <p>
-      Shift-click to poke and unpoke. (Piglet will go crazy!)
-      <button type="button" id="reset">Reset</button>
+      Rotate Light:
+      <button type="button" id="rotate">ON / OFF</button>
     </p>
 
     <script src="../lib/webgl-utils.js"></script>
     <script src="../lib/webgl-debug.js"></script>
     <script src="../lib/cuon-utils.js"></script>
     <script src="../lib/cuon-matrix.js"></script>
+    <script src="Sphere.js"></script>
     <script src="Cube.js"></script>
+    <script src="Camera.js"></script>
     <script src="asg4.js"></script>
   </body>
 </html>
