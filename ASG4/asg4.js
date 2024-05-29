@@ -335,9 +335,9 @@ function renderAllShapes() {
   light.matrix.scale(-0.1, -0.1, -0.1);
   light.render();
 
-  const sphere = new Sphere(10, [1, 0, 0, 0]);
+  const sphere = new Sphere();
+  sphere.color = [0.25, 0.9, 0.9, 1];
   sphere.matrix.translate(1.75, 0.5, 2);
-  sphere.whichTexture = 0;
   if (g_normalOn) sphere.whichTexture = -1;
   sphere.render();
 	
